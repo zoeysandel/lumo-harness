@@ -1,0 +1,17 @@
+{
+  "name": "nextjs-stateful-ai-risk-fixture",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/verify.mjs",
+    "lint": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}

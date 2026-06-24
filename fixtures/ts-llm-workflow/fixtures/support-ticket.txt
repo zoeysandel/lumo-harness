@@ -1,0 +1,5 @@
+Subject: Invoice portal access
+
+Customer cannot access the invoice portal after the latest login reset.
+They need help before Friday because the finance team has to download invoices
+for the monthly close.

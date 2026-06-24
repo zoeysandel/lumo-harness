@@ -1,0 +1,61 @@
+# AGENTS.md Draft
+
+Purpose: make this repo safe and easy to work on with coding agents.
+
+## Project Map
+
+- Stack: TypeScript, Next.js, React, OpenAI
+- Package manager: UNCONFIRMED
+
+## Default Workflow
+
+- Inspect the relevant files before editing.
+- Name the intended first slice before broad implementation.
+- Keep changes in the smallest reviewable slice.
+- Reuse existing route, component, validation, error, and test patterns.
+- Do not include generated build output such as `dist/`, `.next/`, `build/`, or coverage files in the review surface unless explicitly requested.
+- Run the narrowest useful verification command before claiming ready.
+- After verification, check the review surface with `git status --short` and keep generated output out of the final diff.
+- Mark anything unproven as `UNCONFIRMED`.
+
+## TypeScript/Next.js Defaults
+
+- Prefer typed boundaries over broad `any` escape hatches.
+- Keep UI changes inside existing component and styling patterns.
+- Apply ICE for slice choice: prefer the smallest high-impact, high-confidence, low-effort step before broad rewrites.
+- For routes and server actions, reuse existing response shapes and validation style.
+- Keep first-slice state local unless persistence is explicitly requested.
+- Do not convert a Server Component to a Client Component in the first slice unless the requested behavior requires browser state, event handlers, or browser APIs.
+- If UI interaction would add local state, submit state, loading/error UI, or browser-to-route `fetch`, call that out as a broader interaction slice unless the task explicitly asks for a working submit flow.
+- For ambiguous dashboard actions, start with the smallest visible affordance that matches existing UI patterns, then prove server/API behavior separately with a local fixture or example.
+
+## TypeScript/Next.js Quality Bar
+
+- Keep server, client, data-access, and provider responsibilities separated. Do not mix UI rendering, validation, persistence, and external calls in one file when a small boundary would keep the slice clearer.
+- Prefer small pure functions for business rules; keep React components focused on rendering and interaction.
+- Use dependency injection at risky boundaries: pass clients, adapters, or small interfaces into logic instead of instantiating database, provider, email, billing, or analytics clients inside pure code.
+- Follow an existing repository/service pattern when the repo has one. If persistence is newly required, put data access behind the repo's existing data layer or a small `repositories`/`services` seam; do not introduce a repository layer for a local-only first slice.
+- Apply SOLID pragmatically: single responsibility first, explicit dependencies second, abstractions only when they remove real duplication or isolate risky I/O.
+- Apply DRY after the second real duplication. Do not create a generic abstraction just to avoid two clear lines of code.
+- Prefer colocated tests or fixtures for the changed behavior. Add or update the narrowest test that proves the slice before broad snapshot or end-to-end work.
+- Treat `production-ready` as typed, validated, verified, and honest about unverified side effects; do not treat it as permission to build every workflow surface in v1.
+- Review success by behavior shape: fewer unrelated files, no unnecessary client conversion, clearer boundaries, explicit tests or fixtures, and no hidden provider/database side effects.
+- Treat AI/provider calls as gated: use deterministic local behavior or fixtures unless live provider I/O is explicitly requested.
+
+## Final Response Contract
+
+- List changed files.
+- List verification commands run and their result.
+- List not-verified items separately.
+- Do not claim production readiness when provider, auth, persistence, or external workflows were not exercised.
+
+## Verification Commands
+
+- build: `npm run build`
+- lint: `npm run lint`
+
+## Review Gates
+
+- Pause before secrets, auth, privacy, provider I/O, database changes, billing, deploys, or external side effects.
+- Do not read or persist `.env` values.
+- Do not write to production systems without explicit human approval.

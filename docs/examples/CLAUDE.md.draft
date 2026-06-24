@@ -1,0 +1,7 @@
+# CLAUDE.md Draft
+
+Follow `AGENTS.md` as the source of truth for repo-local rules.
+
+Keep the same first-slice, verification, no-go seam, and final-response contract.
+
+Use the same review gates for secrets, provider I/O, database changes, external side effects, and production behavior.

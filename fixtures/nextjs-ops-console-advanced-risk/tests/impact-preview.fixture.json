@@ -1,0 +1,12 @@
+{
+  "name": "impact-preview-local-only",
+  "request": {
+    "accountId": "acct-northstar",
+    "reason": "Estimate blast radius before drafting a containment plan.",
+    "requestedActions": ["executive brief", "billing freeze review"]
+  },
+  "expected": {
+    "status": "local_preview",
+    "noExternalSideEffects": true
+  }
+}

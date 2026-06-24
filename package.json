@@ -1,0 +1,37 @@
+{
+  "name": "lumo-harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "lumo-harness": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check:local": "npm run tester:packet && npm run build && npm test && npm run typecheck && npm run tester:check && npm run tester:feedback && npm run tester:next && npm run tester:share && npm run public:check && npm run goal:audit",
+    "eval:card": "tsx scripts/render-eval-card.ts",
+    "eval:codex": "tsx scripts/eval-codex-comparison.ts",
+    "eval:codex-home": "tsx scripts/check-codex-home.ts",
+    "tester:check": "tsx scripts/check-tester-readiness.ts",
+    "tester:feedback": "tsx scripts/check-tester-feedback.ts",
+    "tester:next": "tsx scripts/check-tester-next.ts",
+    "tester:packet": "tsx scripts/render-tester-packet.ts",
+    "tester:share": "tsx scripts/check-tester-share.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts",
+    "scan:grip": "tsx src/index.ts scan --path ../grip",
+    "preview:dashboard": "tsx src/index.ts preview --path fixtures/nextjs-dashboard-action-risk",
+    "agent:dry-run:grip": "tsx src/index.ts agent --path ../grip --dry-run",
+    "public:check": "tsx scripts/check-public-repo.ts",
+    "goal:audit": "tsx scripts/check-goal-audit.ts"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.11.8",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  }
+}
