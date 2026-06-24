@@ -31,7 +31,108 @@ npm install
 npm run build
 ```
 
+For local testing from this cloned repo, use:
+
+```bash
+npm run lumo -- <command>
+```
+
+Optional local bin setup:
+
+```bash
+npm link
+lumo doctor --path /path/to/repo
+```
+
+## Use It From Your Own Repo
+
+If you want Codex or Claude Code to set up Lumo for a repo, start with analysis
+before writing any files. Copy this into your coding agent from the repo you want
+to improve:
+
+```txt
+I want to make this repo easier and safer to work on with Codex/Claude Code using
+Lumo Harness.
+
+First, do a read-only analysis of this repository. Do not edit files yet.
+
+Analyze:
+- project type, framework, package manager, and available commands;
+- existing repo instructions such as AGENTS.md, CLAUDE.md, README, docs, tests,
+  lint, typecheck, and verification scripts;
+- architecture patterns and boundaries the agent should follow;
+- risky seams such as auth, database, billing, provider APIs, secrets,
+  migrations, background jobs, email, notifications, and external side effects;
+- where the repo currently has clear rails and where it is ambiguous.
+
+Then propose the smallest useful Lumo harness setup for this repo:
+- AGENTS.md changes or a first AGENTS.md draft;
+- optional CLAUDE.md notes if Claude Code is used;
+- 1-3 workflow docs, only if useful;
+- the verification command the agent should run before claiming done;
+- stop conditions where the agent should pause for human review;
+- what you would not add yet.
+
+Important:
+- keep the setup small and editable;
+- do not overwrite existing repo rules;
+- do not add a large framework;
+- ask before writing files;
+- after the analysis, show me the proposed files and explain why each one exists.
+```
+
+The intended flow is:
+
+```txt
+analyze repo -> preview harness -> user approves -> write small repo-level rails
+```
+
+## MVP Tester Flow
+
+For the first tester, keep it to four steps.
+
+1. Check that Lumo can read the repo and find local Codex:
+
+```bash
+npm run lumo -- doctor --path /path/to/repo
+```
+
+If they want to prove local Codex login/readiness too:
+
+```bash
+npm run lumo -- doctor --path /path/to/repo --with-codex
+```
+
+2. Generate the Lumo Rubric report with local Codex synthesis:
+
+```bash
+npm run lumo -- analyze --path /path/to/repo --html --with-codex --output tmp/lumo-report.html
+open tmp/lumo-report.html
+```
+
+3. Preview the proposed harness files:
+
+```bash
+npm run lumo -- init --path /path/to/repo --dry-run
+```
+
+4. Only if the proposal looks right, write the first harness files:
+
+```bash
+npm run lumo -- init --path /path/to/repo --write
+```
+
+`init --write` refuses to overwrite existing files. If the repo already has
+`AGENTS.md`, `CLAUDE.md`, or workflow docs, review the dry-run output and apply
+the useful parts manually.
+
 ## Use
+
+Check local readiness:
+
+```bash
+npm run lumo -- doctor --path /path/to/repo
+```
 
 Deterministic scan, no API key:
 
@@ -41,12 +142,45 @@ npm run scan:grip
 npx tsx src/index.ts scan --path /path/to/repo
 ```
 
+Generate a local HTML rubric report, no API key:
+
+```bash
+npx tsx src/index.ts analyze --path /path/to/repo --html --output lumo-analysis-report.html
+```
+
+Generate the same report with optional local Codex CLI synthesis:
+
+```bash
+npx tsx src/index.ts analyze --path /path/to/repo --html --with-codex --output lumo-analysis-report.html
+```
+
+This does not require an `OPENAI_API_KEY` in Lumo. It does require the local
+`codex` CLI to be installed and signed in. Lumo runs Codex in read-only sandbox
+mode and does not write files to the target repo. The optional Codex step has a
+default timeout of 90 seconds:
+
+```bash
+npx tsx src/index.ts analyze --path /path/to/repo --html --with-codex --codex-timeout-ms 120000 --output lumo-analysis-report.html
+```
+
 Preview draft harness files, no writes and no API key:
 
 ```bash
 npx tsx src/index.ts preview --path /path/to/repo
 # or try the dashboard fixture
 npm run preview:dashboard
+```
+
+Initialize proposed harness files. Preview only by default:
+
+```bash
+npm run lumo -- init --path /path/to/repo --dry-run
+```
+
+Write only after review:
+
+```bash
+npm run lumo -- init --path /path/to/repo --write
 ```
 
 Check whether the current tester proof package is complete:
@@ -193,6 +327,47 @@ Example generated harness drafts are available at
 Example workflow drafts are available under
 [docs/examples/workflows](docs/examples/workflows).
 Generated `eval-runs/` remain local and ignored by git.
+
+## Lumo Rubric Report
+
+The scanner can inspect a repo and render a minimal local HTML report against
+the Lumo Rubric:
+
+```bash
+npx tsx src/index.ts analyze --path /path/to/repo --html --output lumo-analysis-report.html
+```
+
+For a more useful first-tester run, add local Codex synthesis:
+
+```bash
+npx tsx src/index.ts analyze --path /path/to/repo --html --with-codex --output lumo-analysis-report.html
+```
+
+That report is a diagnostic artifact. It should help a builder see where the
+repo currently stands before any harness files are written.
+
+Current rubric areas:
+
+- repo contract;
+- verification rail;
+- workflow shape;
+- risk gates;
+- boundary discipline;
+- proof habit.
+
+The setup query belongs in this README, not in the report. The report should
+stay focused on score, evidence, and smallest next improvement:
+
+- stack and commands;
+- existing agent rails;
+- missing or ambiguous rails;
+- risk seams;
+- recommended first improvement;
+- optional Codex interpretation;
+- not-verified notes.
+
+This should be a local artifact, not a SaaS dashboard. The goal is to give a
+builder a clean, shareable report before any harness files are written.
 
 The card must keep claims narrow:
 

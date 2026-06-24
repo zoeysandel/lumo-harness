@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "bin": {
-    "lumo-harness": "./dist/index.js"
+    "lumo": "./dist/src/index.js",
+    "lumo-harness": "./dist/src/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -19,6 +20,7 @@
     "tester:share": "tsx scripts/check-tester-share.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx --test src/**/*.test.ts",
+    "lumo": "tsx src/index.ts",
     "scan:grip": "tsx src/index.ts scan --path ../grip",
     "preview:dashboard": "tsx src/index.ts preview --path fixtures/nextjs-dashboard-action-risk",
     "agent:dry-run:grip": "tsx src/index.ts agent --path ../grip --dry-run",
