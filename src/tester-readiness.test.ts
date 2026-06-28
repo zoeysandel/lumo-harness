@@ -40,9 +40,11 @@ test("tester packet renders the send gate without claiming it was sent", async (
   assert.match(rendered, /approve_as_is/);
   assert.match(rendered, /docs\/private-tester-share-manifest\.md/);
   assert.match(rendered, /docs\/first-tester-proof-brief\.md/);
+  assert.match(rendered, /docs\/control-layer-walkthrough\.md/);
   assert.match(rendered, /docs\/first-tester-decision-map\.md/);
   assert.match(rendered, /docs\/first-tester-feedback-scenarios\.md/);
   assert.match(rendered, /synthetic examples of the four routes/);
+  assert.match(rendered, /Did the preflight\/checkpoint\/review idea make sense\?/);
   assert.match(rendered, /Did the proof card make the baseline vs Lumo difference obvious\?/);
   assert.match(rendered, /Score these signals 0-2/);
   assert.match(rendered, /Risky seams avoided or gated/);

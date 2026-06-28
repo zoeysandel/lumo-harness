@@ -97,6 +97,7 @@ function manifestHasExpectedLists(minimumShareSet: string[], doNotShare: string[
   const requiredShare = [
     "docs/first-tester-proof-brief.md",
     "docs/lumo-v0-test-brief.md",
+    "docs/control-layer-walkthrough.md",
     "docs/public-tester-quickstart.md",
     "docs/examples/dashboard-action-proof-card.html",
     "docs/examples/dashboard-action-manual-review.md",

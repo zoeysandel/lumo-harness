@@ -2,15 +2,31 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { runCodexCheckpointSynthesis } from "./checkpoint-codex.js";
+import { createCheckpointCard, readGitCheckpointState, renderCheckpointCard } from "./checkpoint.js";
 import { runCodexSynthesis } from "./codex-synthesis.js";
 import { renderDoctorReport, runDoctor } from "./doctor.js";
 import { renderHtmlReadinessReport } from "./html-report.js";
 import { renderInitResult, runInit } from "./init.js";
+import { runCodexPreflightSynthesis } from "./preflight-codex.js";
+import { createPreflightCard, renderPreflightCard } from "./preflight.js";
 import { generatePreviewPack } from "./preview.js";
 import { renderReadinessReport } from "./reporter.js";
+import { runCodexReviewSynthesis } from "./review-codex.js";
+import { createReviewCard, readGitReviewState, renderReviewCard } from "./review.js";
 import { scanRepository } from "./scanner.js";
 
-type Command = "doctor" | "scan" | "analyze" | "preview" | "init" | "agent" | "help";
+type Command =
+  | "doctor"
+  | "scan"
+  | "analyze"
+  | "preview"
+  | "init"
+  | "preflight"
+  | "checkpoint"
+  | "review"
+  | "agent"
+  | "help";
 
 async function main(): Promise<void> {
   const command = parseCommand(process.argv[2]);
@@ -20,6 +36,7 @@ async function main(): Promise<void> {
   const dryRun = hasFlag("--dry-run");
   const withCodex = hasFlag("--with-codex");
   const write = hasFlag("--write");
+  const task = getFlagValue("--task");
   const codexTimeoutMs = parseOptionalIntegerFlag("--codex-timeout-ms");
 
   if (command === "help") {
@@ -88,6 +105,110 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === "preflight") {
+    if (!task || task.trim().length === 0) {
+      console.error("--task is required for preflight.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const scan = await scanRepository({ repoPath });
+    const deterministicCard = createPreflightCard(scan, task);
+    if (withCodex) {
+      console.error("Running optional Codex preflight synthesis in read-only sandbox...");
+    }
+    const codexPreflight = withCodex
+      ? await runCodexPreflightSynthesis(scan, task, deterministicCard, {
+          timeoutMs: codexTimeoutMs ?? undefined,
+        })
+      : undefined;
+    const card = codexPreflight?.card ?? deterministicCard;
+
+    if (format === "json") {
+      console.log(JSON.stringify({ repoPath: scan.repoPath, task, preflight: card, codexPreflight }, null, 2));
+      return;
+    }
+
+    console.log(renderPreflightCard(card, { repoPath: scan.repoPath, task }));
+    if (codexPreflight) {
+      console.log("## Codex Preflight");
+      console.log("");
+      console.log(`${codexPreflight.status}: ${codexPreflight.message}`);
+      console.log("");
+    }
+    return;
+  }
+
+  if (command === "checkpoint") {
+    if (!task || task.trim().length === 0) {
+      console.error("--task is required for checkpoint.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const scan = await scanRepository({ repoPath });
+    const gitState = await readGitCheckpointState(repoPath);
+    const deterministicCard = createCheckpointCard(scan, task, gitState);
+    if (withCodex) {
+      console.error("Running optional Codex checkpoint synthesis in read-only sandbox...");
+    }
+    const codexCheckpoint = withCodex
+      ? await runCodexCheckpointSynthesis(scan, task, gitState, deterministicCard, {
+          timeoutMs: codexTimeoutMs ?? undefined,
+        })
+      : undefined;
+    const card = codexCheckpoint?.card ?? deterministicCard;
+
+    if (format === "json") {
+      console.log(JSON.stringify({ repoPath: scan.repoPath, task, checkpoint: card, gitState, codexCheckpoint }, null, 2));
+      return;
+    }
+
+    console.log(renderCheckpointCard(card, { repoPath: scan.repoPath, task }));
+    if (codexCheckpoint) {
+      console.log("## Codex Checkpoint");
+      console.log("");
+      console.log(`${codexCheckpoint.status}: ${codexCheckpoint.message}`);
+      console.log("");
+    }
+    return;
+  }
+
+  if (command === "review") {
+    if (!task || task.trim().length === 0) {
+      console.error("--task is required for review.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const scan = await scanRepository({ repoPath });
+    const gitState = await readGitReviewState(repoPath);
+    const deterministicCard = createReviewCard(scan, task, gitState);
+    if (withCodex) {
+      console.error("Running optional Codex review synthesis in read-only sandbox...");
+    }
+    const codexReview = withCodex
+      ? await runCodexReviewSynthesis(scan, task, gitState, deterministicCard, {
+          timeoutMs: codexTimeoutMs ?? undefined,
+        })
+      : undefined;
+    const card = codexReview?.card ?? deterministicCard;
+
+    if (format === "json") {
+      console.log(JSON.stringify({ repoPath: scan.repoPath, task, review: card, gitState, codexReview }, null, 2));
+      return;
+    }
+
+    console.log(renderReviewCard(card, { repoPath: scan.repoPath, task }));
+    if (codexReview) {
+      console.log("## Codex Review");
+      console.log("");
+      console.log(`${codexReview.status}: ${codexReview.message}`);
+      console.log("");
+    }
+    return;
+  }
+
   if (command === "agent") {
     if (dryRun) {
       const scan = await scanRepository({ repoPath });
@@ -125,6 +246,9 @@ function parseCommand(rawCommand: string | undefined): Command {
     rawCommand === "analyze" ||
     rawCommand === "preview" ||
     rawCommand === "init" ||
+    rawCommand === "preflight" ||
+    rawCommand === "checkpoint" ||
+    rawCommand === "review" ||
     rawCommand === "agent"
   ) {
     return rawCommand;
@@ -174,6 +298,9 @@ Usage:
   lumo-harness analyze --path <repo> [--html] [--output report.html] [--with-codex] [--codex-timeout-ms 90000]
   lumo-harness preview --path <repo> [--format markdown|json]
   lumo-harness init --path <repo> [--dry-run|--write] [--format markdown|json]
+  lumo-harness preflight --path <repo> --task "..." [--with-codex] [--format markdown|json]
+  lumo-harness checkpoint --path <repo> --task "..." [--with-codex] [--format markdown|json]
+  lumo-harness review --path <repo> --task "..." [--with-codex] [--format markdown|json]
   lumo-harness agent --path <repo> --dry-run
   lumo-harness agent --path <repo>
 
@@ -184,6 +311,9 @@ Notes:
   --codex-timeout-ms controls the optional Codex synthesis timeout. Default: 90000.
   init previews proposed harness files by default. Use --write only after review.
   preview prints draft harness files but does not write them.
+  preflight prints a read-only decision card for the first coding-agent slice.
+  checkpoint prints a read-only steering card for in-progress git changes.
+  review prints a read-only completion card for deciding whether work can be claimed done.
   agent without --dry-run uses the OpenAI Agents SDK and requires OPENAI_API_KEY.
   Slice 1 writes only when init is called with --write and refuses to overwrite existing files.
 `);

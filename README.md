@@ -2,6 +2,12 @@
 
 Create a living repo harness for AI coding agents.
 
+Direction: Lumo is becoming a plug-and-play second set of eyes between a user and
+an AI coding agent. The current repo-init flow is the first concrete slice; the
+broader product is a routing, checkpoint, review, and learning layer. See
+[docs/product-direction.md](docs/product-direction.md). For the first dogfood
+walkthrough, see [docs/control-layer-walkthrough.md](docs/control-layer-walkthrough.md).
+
 Status: v0 local proof. Lumo Harness scans a local repo, previews agent rails,
 and compares Codex behavior with and without a generated repo `AGENTS.md`. It
 does not write to the target repo by default.
@@ -45,6 +51,59 @@ lumo doctor --path /path/to/repo
 ```
 
 ## Use It From Your Own Repo
+
+Agent-facing first step:
+
+```bash
+npm run lumo -- preflight --path /path/to/repo --task "Add the next small feature"
+```
+
+Use this when Codex, Claude Code, Cursor, or another coding agent needs a
+read-only decision card before implementation. It does not write files or call a
+model by default. Add `--with-codex` when you want local Codex to interpret the
+task on top of the deterministic scan:
+
+```bash
+npm run lumo -- preflight --path /path/to/repo --task "Add the next small feature" --with-codex
+```
+
+For agent/MCP callers:
+
+```bash
+npm run lumo -- preflight --path /path/to/repo --task "Add the next small feature" --format json
+```
+
+Dynamic steering while work is in progress:
+
+```bash
+npm run lumo -- checkpoint --path /path/to/repo --task "Add the next small feature"
+```
+
+Use this after the agent has produced a first diff or when a long run feels
+unclear. Lumo reads git status/diff signals and returns `go`, `check_again`,
+`pause`, or `pivot`.
+
+Add optional local Codex interpretation:
+
+```bash
+npm run lumo -- checkpoint --path /path/to/repo --task "Add the next small feature" --with-codex
+```
+
+Completion review before claiming done:
+
+```bash
+npm run lumo -- review --path /path/to/repo --task "Add the next small feature"
+```
+
+Use this when the coding agent thinks the work is complete. Lumo reads the
+current diff and returns whether to claim done, run one more check, pause for
+user review, or pivot.
+
+Add optional local Codex interpretation:
+
+```bash
+npm run lumo -- review --path /path/to/repo --task "Add the next small feature" --with-codex
+```
 
 If you want Codex or Claude Code to set up Lumo for a repo, start with analysis
 before writing any files. Copy this into your coding agent from the repo you want
@@ -133,6 +192,45 @@ Check local readiness:
 ```bash
 npm run lumo -- doctor --path /path/to/repo
 ```
+
+Generate a read-only preflight decision card:
+
+```bash
+npm run lumo -- preflight --path /path/to/repo --task "Add billing email editing"
+```
+
+The output tells the coding agent whether to continue, check one thing first,
+pause for a user decision, or narrow the route.
+
+Add optional local Codex interpretation:
+
+```bash
+npm run lumo -- preflight --path /path/to/repo --task "Add billing email editing" --with-codex
+```
+
+Generate a read-only checkpoint steering card from current git changes:
+
+```bash
+npm run lumo -- checkpoint --path /path/to/repo --task "Add billing email editing"
+```
+
+The output tells the coding agent whether the current diff still looks small and
+on course, needs one more check, should pause for user steering, or should pivot.
+
+Add optional local Codex interpretation:
+
+```bash
+npm run lumo -- checkpoint --path /path/to/repo --task "Add billing email editing" --with-codex
+```
+
+Generate a read-only review card before claiming done:
+
+```bash
+npm run lumo -- review --path /path/to/repo --task "Add billing email editing"
+```
+
+The output tells the coding agent whether it is reasonable to present the work
+as done, or whether one more check, user decision, or route change is needed.
 
 Deterministic scan, no API key:
 
@@ -412,6 +510,7 @@ For the checkpoint method and current best proof, see:
 
 - [docs/mvp-use-case.md](docs/mvp-use-case.md)
 - [docs/lumo-init-mvp-scope.md](docs/lumo-init-mvp-scope.md)
+- [docs/control-layer-walkthrough.md](docs/control-layer-walkthrough.md)
 - [docs/lumo-v0-test-brief.md](docs/lumo-v0-test-brief.md)
 - [docs/golden-use-case.md](docs/golden-use-case.md)
 - [docs/nextjs-harness-quality-bar.md](docs/nextjs-harness-quality-bar.md)

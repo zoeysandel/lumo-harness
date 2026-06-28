@@ -5,10 +5,39 @@ For the shorter "why should I care?" version, start with
 [lumo-v0-test-brief.md](lumo-v0-test-brief.md), then
 [first-tester-proof-brief.md](first-tester-proof-brief.md).
 For a two-minute live explanation, use [demo-walkthrough.md](demo-walkthrough.md).
+For the current control-layer shape, use
+[control-layer-walkthrough.md](control-layer-walkthrough.md).
 For the draft message Zoey can send to one tester, use
 [first-tester-invite-draft.md](first-tester-invite-draft.md).
 
-The first public test is not a product install flow yet. It is a local proof loop:
+The first public test is not a product install flow yet. It has two layers:
+
+```txt
+fast path: doctor -> preflight -> read the decision card
+proof path: same fixture, same Codex prompt, baseline vs Lumo
+```
+
+The fast path tests whether Lumo's control layer is understandable. The proof
+path tests whether repo rails change Codex output in a local comparison.
+
+## What This Proves
+
+This quickstart can show whether Lumo gives a coding agent a clearer starting
+route and whether the proof loop is understandable.
+
+Useful signals:
+
+- the preflight card names a small first route;
+- risky seams become stop conditions instead of hidden assumptions;
+- the eval card separates proof from caveat;
+- the tester can explain what Lumo changed without reading the whole repo.
+
+## What This Does Not Prove
+
+This quickstart does not prove that Lumo guarantees better code, production
+safety, clean-room Codex behavior, or support for every stack.
+
+The eval still runs in local-user-mode:
 
 ```txt
 same fixture
@@ -47,7 +76,43 @@ Expected result:
 tsc -p tsconfig.json
 ```
 
-## 2. Run The Current Strongest Eval
+## 2. Run The Fast Control-Layer Check
+
+First check local readiness:
+
+```bash
+npm run lumo -- doctor --path fixtures/nextjs-pattern-following
+```
+
+Then ask Lumo how a coding agent should start:
+
+```bash
+npm run lumo -- preflight --path fixtures/nextjs-pattern-following --task "Add a small settings panel change. Keep the first slice reviewable and use the repo's available verification command before claiming done."
+```
+
+Expected shape:
+
+```txt
+Status: go or check_again
+Route: small first slice
+Checks: local verification command
+Stop If: risky seam or broader scope appears
+```
+
+Optional local Codex interpretation:
+
+```bash
+npm run lumo -- preflight --path fixtures/nextjs-pattern-following --task "Add a small settings panel change. Keep the first slice reviewable and use the repo's available verification command before claiming done." --with-codex
+```
+
+Read [control-layer-walkthrough.md](control-layer-walkthrough.md) if you want to
+try the full manual sequence:
+
+```txt
+preflight -> let Codex/Claude work -> checkpoint -> review
+```
+
+## 3. Optional: Run The Current Strongest Eval
 
 Optional readiness check before the longer Codex run:
 
@@ -151,7 +216,13 @@ If you missed the printed `<run-id>`, use:
 ls -td eval-runs/* | head -1
 ```
 
-## 3. Read The Comparison
+For a shorter historical proof run, you can also use:
+
+```bash
+npm run eval:codex -- --case nextjs-stateful-ai-risk
+```
+
+## 4. Read The Comparison
 
 Open:
 
@@ -189,7 +260,7 @@ That is useful evidence, not a guarantee. In that run baseline was also safe,
 so the signal is reviewability and first-slice restraint rather than unique
 danger prevention.
 
-## 4. Render The Proof Card
+## 5. Render The Proof Card
 
 Use the exact command printed at the end of the eval:
 

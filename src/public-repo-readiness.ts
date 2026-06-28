@@ -26,6 +26,7 @@ const requiredPublicPaths = [
   "docs",
   "docs/lumo-init-mvp-scope.md",
   "docs/lumo-v0-test-brief.md",
+  "docs/control-layer-walkthrough.md",
   "docs/golden-use-case.md",
   "docs/nextjs-harness-quality-bar.md",
   "docs/dogfood-nextjs-larger-projects.md",
@@ -54,6 +55,7 @@ const requiredIgnoredPaths = [
 const shareSafeDocs = [
   "docs/public-repo-checklist.md",
   "docs/lumo-v0-test-brief.md",
+  "docs/control-layer-walkthrough.md",
   "docs/lumo-init-mvp-scope.md",
   "docs/golden-use-case.md",
   "docs/nextjs-harness-quality-bar.md",

@@ -12,14 +12,16 @@ Point the tester at these files first:
 ```txt
 docs/first-tester-proof-brief.md
 docs/lumo-v0-test-brief.md
+docs/control-layer-walkthrough.md
 docs/public-tester-quickstart.md
 docs/examples/dashboard-action-proof-card.html
 docs/examples/dashboard-action-manual-review.md
 docs/examples/screenshots/dashboard-action-proof-card.png
 ```
 
-These explain the current v0 value proposition, the proof, the local quickstart,
-the strongest stable proof card, and the manual review caveats.
+These explain the current v0 value proposition, the control-layer walkthrough,
+the proof, the local quickstart, the strongest stable proof card, and the manual
+review caveats.
 
 ## Internal Zoey Files
 

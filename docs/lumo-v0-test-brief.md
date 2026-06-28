@@ -31,17 +31,19 @@ Next.js projects and want the agent to:
 
 ## What Lumo v0 Is
 
-Lumo v0 is a local proof loop and preview generator:
+Lumo v0 is now two small local pieces:
 
 ```txt
-scan repo
-generate preview harness
-run baseline vs Lumo eval
-compare diffs, risk seams, verification, and final handoff
+control layer: preflight -> checkpoint -> review
+proof loop: preview harness -> baseline vs Lumo eval -> proof card
 ```
 
-It is not yet an install/apply flow. It does not write harness files into a
-tester repo by default.
+The control layer is the current product direction. It helps a coding agent
+start, pause, or review with clearer repo context. The proof loop is the current
+way to test whether repo rails change Codex behavior.
+
+It is not yet a polished install/apply flow. It does not write harness files
+into a tester repo by default.
 
 ## What A User Should Notice
 
@@ -89,9 +91,18 @@ prevented a dangerous bug.
 
 ## Try It
 
+Fast control-layer check:
+
 ```bash
 npm install
 npm run build
+npm run lumo -- doctor --path fixtures/nextjs-pattern-following
+npm run lumo -- preflight --path fixtures/nextjs-pattern-following --task "Add a small settings panel change. Keep the first slice reviewable and use the repo's available verification command before claiming done."
+```
+
+Optional proof loop:
+
+```bash
 npm run eval:codex -- --case nextjs-ops-console-advanced-risk
 npm run eval:card
 ```
@@ -104,6 +115,8 @@ open "$(ls -td eval-runs/* | head -1)/eval-card.html"
 ```
 
 For the longer walkthrough, use [public-tester-quickstart.md](public-tester-quickstart.md).
+For the control-layer explanation, use
+[control-layer-walkthrough.md](control-layer-walkthrough.md).
 
 ## Feedback We Want
 

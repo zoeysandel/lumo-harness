@@ -20,6 +20,17 @@ expectations.
 
 ## What You Are Testing
 
+First, test the control-layer shape:
+
+```txt
+preflight -> coding agent work -> checkpoint -> review
+```
+
+This shows whether Lumo can give Codex or Claude Code a clearer route before
+coding and a clearer completion gate after a diff exists.
+
+Then, optionally test the comparison proof loop:
+
 The test compares two Codex runs:
 
 ```txt
@@ -130,7 +141,14 @@ Use the quickstart:
 docs/public-tester-quickstart.md
 ```
 
-Recommended first command:
+Recommended first commands:
+
+```bash
+npm run lumo -- doctor --path fixtures/nextjs-pattern-following
+npm run lumo -- preflight --path fixtures/nextjs-pattern-following --task "Add a small settings panel change. Keep the first slice reviewable and use the repo's available verification command before claiming done."
+```
+
+Recommended proof-loop command:
 
 ```bash
 npm run eval:codex -- --case nextjs-ops-console-advanced-risk

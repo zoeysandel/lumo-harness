@@ -11,7 +11,7 @@ Status: ready
 
 | Check | Status | Detail |
 | --- | --- | --- |
-| Required tester files | PASS | 20 files present |
+| Required tester files | PASS | 21 files present |
 | Share-safe example text | PASS | No local paths, obvious secret markers, or private-name markers found |
 | Proof card boundary | PASS | Hypothesis, proof, non-proof, and risk seam signal are visible |
 | X draft safety | PASS | Draft-only approval gate and non-proof boundary are present |
@@ -37,16 +37,17 @@ Next: Zoey can review the first tester packet and decide whether to send it.
 ```txt
 Hey, ik ben iets kleins aan het testen: Lumo Harness.
 
-Het idee is simpel: voordat je Codex/Claude Code aan een TypeScript/Next.js repo
-laat werken, maakt Lumo de repo-afspraken expliciet, zodat de agent kleiner,
-beter reviewbaar en eerlijker over "not verified" werkt.
+Het idee is simpel: Lumo zit als kleine stuurlaag tussen jou en Codex/Claude
+Code. Eerst geeft het een preflight kaart, daarna kan het tijdens of na het werk
+helpen checken of de agent nog klein, reviewbaar en eerlijk over "not verified"
+werkt.
 
 Ik zoek geen algemene mening, maar 15 minuten concrete feedback:
 
-1. Is het duidelijk wat de eval probeert te bewijzen?
+1. Is de preflight/checkpoint/review flow duidelijk?
 2. Maakt de proof card het verschil tussen baseline en Lumo snel duidelijk?
-3. Zou jij zo'n repo-level harness willen voordat je een TypeScript/Next.js
-   feature laat bouwen?
+3. Zou jij zo'n repo-level harness/stuurlaag willen voordat je een
+   TypeScript/Next.js feature laat bouwen?
 
 Start hier:
 docs/lumo-v0-test-brief.md
@@ -54,9 +55,9 @@ docs/lumo-v0-test-brief.md
 Daarna kun je de lokale quickstart draaien:
 docs/public-tester-quickstart.md
 
-Belangrijk: dit claimt nog niet dat Lumo betere code garandeert. De eval draait
-ook in local-user-mode, dus een globale Codex AGENTS.md kan beide runs
-beïnvloeden. Ik wil juist testen of de review surface en risk boundaries
+Belangrijk: dit claimt nog niet dat Lumo betere code garandeert. De optionele
+eval draait ook in local-user-mode, dus een globale Codex AGENTS.md kan beide
+runs beïnvloeden. Ik wil juist testen of de review surface en risk boundaries
 merkbaar beter worden.
 ```
 
@@ -66,6 +67,7 @@ Use `docs/private-tester-share-manifest.md` before sharing anything externally.
 
 - `docs/first-tester-proof-brief.md`
 - `docs/lumo-v0-test-brief.md`
+- `docs/control-layer-walkthrough.md`
 - `docs/public-tester-quickstart.md`
 - `docs/examples/dashboard-action-proof-card.html`
 - `docs/examples/dashboard-action-manual-review.md`
@@ -79,6 +81,8 @@ Time spent:
 Did the brief make sense in under 2 minutes?
 
 Which command/eval did you run?
+
+Did the preflight/checkpoint/review idea make sense?
 
 Did you use local-user-mode or a custom CODEX_HOME preflight?
 

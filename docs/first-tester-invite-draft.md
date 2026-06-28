@@ -5,24 +5,26 @@ Use [first-tester-review-packet.md](first-tester-review-packet.md) for the
 approval gate before sending.
 
 Use this to invite one builder who already uses Codex or Claude Code. The goal is
-not to get praise. The goal is to learn whether the proof loop is understandable
-and whether the generated repo rails feel useful before a real coding-agent task.
+not to get praise. The goal is to learn whether the control-layer flow is
+understandable and whether the generated repo rails feel useful before a real
+coding-agent task.
 
 ## Short DM
 
 ```txt
 Hey, ik ben iets kleins aan het testen: Lumo Harness.
 
-Het idee is simpel: voordat je Codex/Claude Code aan een TypeScript/Next.js repo
-laat werken, maakt Lumo de repo-afspraken expliciet, zodat de agent kleiner,
-beter reviewbaar en eerlijker over "not verified" werkt.
+Het idee is simpel: Lumo zit als kleine stuurlaag tussen jou en Codex/Claude
+Code. Eerst geeft het een preflight kaart, daarna kan het tijdens of na het werk
+helpen checken of de agent nog klein, reviewbaar en eerlijk over "not verified"
+werkt.
 
 Ik zoek geen algemene mening, maar 15 minuten concrete feedback:
 
-1. Is het duidelijk wat de eval probeert te bewijzen?
+1. Is de preflight/checkpoint/review flow duidelijk?
 2. Maakt de proof card het verschil tussen baseline en Lumo snel duidelijk?
-3. Zou jij zo'n repo-level harness willen voordat je een TypeScript/Next.js
-   feature laat bouwen?
+3. Zou jij zo'n repo-level harness/stuurlaag willen voordat je een
+   TypeScript/Next.js feature laat bouwen?
 
 Start hier:
 docs/lumo-v0-test-brief.md
@@ -30,9 +32,9 @@ docs/lumo-v0-test-brief.md
 Daarna kun je de lokale quickstart draaien:
 docs/public-tester-quickstart.md
 
-Belangrijk: dit claimt nog niet dat Lumo betere code garandeert. De eval draait
-ook in local-user-mode, dus een globale Codex AGENTS.md kan beide runs
-beïnvloeden. Ik wil juist testen of de review surface en risk boundaries
+Belangrijk: dit claimt nog niet dat Lumo betere code garandeert. De optionele
+eval draait ook in local-user-mode, dus een globale Codex AGENTS.md kan beide
+runs beïnvloeden. Ik wil juist testen of de review surface en risk boundaries
 merkbaar beter worden.
 ```
 
@@ -46,15 +48,15 @@ Probleem dat ik wil testen:
 veel mensen prompten hun agent per taak, maar de repo zelf vertelt nog niet
 duidelijk hoe de agent zich moet gedragen.
 
-Lumo probeert daarom repo-level rails te maken:
+Lumo probeert daarom een kleine control layer plus repo-level rails te maken:
 - welke files/patronen moet de agent volgen;
 - welke commands bewijzen een wijziging;
 - welke risky seams moeten eerst menselijk bekeken worden;
 - wat moet de agent expliciet als not verified markeren.
 
-De eerste test is bewust klein:
-same TypeScript/Next.js fixture, same Codex prompt, zonder Lumo vs met Lumo
-AGENTS.md.
+De eerste test is bewust klein: eerst een preflight kaart op een
+TypeScript/Next.js fixture, daarna optioneel same fixture, same Codex prompt,
+zonder Lumo vs met Lumo AGENTS.md.
 
 Nuance:
 deze eerste eval is local-user-mode, niet clean-room. De runner negeert
@@ -71,6 +73,8 @@ Time spent:
 Did the brief make sense in under 2 minutes?
 
 Which command/eval did you run?
+
+Did the preflight/checkpoint/review idea make sense?
 
 Did you use local-user-mode or a custom CODEX_HOME preflight?
 

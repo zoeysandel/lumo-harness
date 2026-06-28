@@ -69,16 +69,17 @@ and feedback template.
 ```txt
 Hey, ik ben iets kleins aan het testen: Lumo Harness.
 
-Het idee is simpel: voordat je Codex/Claude Code aan een TypeScript/Next.js repo
-laat werken, maakt Lumo de repo-afspraken expliciet, zodat de agent kleiner,
-beter reviewbaar en eerlijker over "not verified" werkt.
+Het idee is simpel: Lumo zit als kleine stuurlaag tussen jou en Codex/Claude
+Code. Eerst geeft het een preflight kaart, daarna kan het tijdens of na het werk
+helpen checken of de agent nog klein, reviewbaar en eerlijk over "not verified"
+werkt.
 
 Ik zoek geen algemene mening, maar 15 minuten concrete feedback:
 
-1. Is het duidelijk wat de eval probeert te bewijzen?
+1. Is de preflight/checkpoint/review flow duidelijk?
 2. Maakt de proof card het verschil tussen baseline en Lumo snel duidelijk?
-3. Zou jij zo'n repo-level harness willen voordat je een TypeScript/Next.js
-   feature laat bouwen?
+3. Zou jij zo'n repo-level harness/stuurlaag willen voordat je een
+   TypeScript/Next.js feature laat bouwen?
 
 Start hier:
 docs/lumo-v0-test-brief.md
@@ -86,9 +87,9 @@ docs/lumo-v0-test-brief.md
 Daarna kun je de lokale quickstart draaien:
 docs/public-tester-quickstart.md
 
-Belangrijk: dit claimt nog niet dat Lumo betere code garandeert. De eval draait
-ook in local-user-mode, dus een globale Codex AGENTS.md kan beide runs
-beïnvloeden. Ik wil juist testen of de review surface en risk boundaries
+Belangrijk: dit claimt nog niet dat Lumo betere code garandeert. De optionele
+eval draait ook in local-user-mode, dus een globale Codex AGENTS.md kan beide
+runs beïnvloeden. Ik wil juist testen of de review surface en risk boundaries
 merkbaar beter worden.
 ```
 
@@ -102,6 +103,7 @@ docs/first-tester-invite-draft.md
 
 Minimum:
 
+- `docs/control-layer-walkthrough.md`;
 - `docs/first-tester-proof-brief.md`;
 - `docs/lumo-v0-test-brief.md`;
 - `docs/public-tester-quickstart.md`.
@@ -133,6 +135,7 @@ Minimum useful feedback:
 | Need | Why |
 | --- | --- |
 | Did the brief make sense? | Tests positioning clarity |
+| Did the preflight/checkpoint/review flow make sense? | Tests the new control-layer direction |
 | Did they understand baseline vs Lumo? | Tests proof clarity |
 | Could they run an eval, or where did it block? | Tests local reproducibility |
 | Did they use local-user-mode or custom CODEX_HOME preflight? | Tests instruction-environment reproducibility |
