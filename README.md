@@ -7,6 +7,8 @@ an AI coding agent. The current repo-init flow is the first concrete slice; the
 broader product is a routing, checkpoint, review, and learning layer. See
 [docs/product-direction.md](docs/product-direction.md). For the first dogfood
 walkthrough, see [docs/control-layer-walkthrough.md](docs/control-layer-walkthrough.md).
+For the first thread-checkpoint design target, see
+[docs/thread-checkpoint-v1.md](docs/thread-checkpoint-v1.md).
 
 Status: v0 local proof. Lumo Harness scans a local repo, previews agent rails,
 and compares Codex behavior with and without a generated repo `AGENTS.md`. It

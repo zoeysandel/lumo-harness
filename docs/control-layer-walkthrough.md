@@ -169,3 +169,14 @@ approve?
 
 If yes, add the smallest next control surface. If no, improve the decision cards
 before adding rulesets, a TUI, MCP, or more generated harness files.
+
+## Thread Checkpoint Extension
+
+Repo checkpoint looks at a git diff. Thread checkpoint looks at a long-running
+agent conversation and asks whether the next move still follows from the
+evidence.
+
+Design target:
+
+- [thread-checkpoint-v1.md](thread-checkpoint-v1.md)
+- [cases/tab-3017-thread-checkpoint.md](cases/tab-3017-thread-checkpoint.md)

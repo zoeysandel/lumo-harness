@@ -44,6 +44,10 @@ preflight -> agent work -> checkpoint -> agent work -> review -> learn -> better
 | Review | Reviews outcome, proof, risks, and understandability | "Here is what happened and what is not proven." |
 | Learn | Turns repeated friction into proposed harness improvements | "This should become a rule, skill, doc, or check." |
 
+Thread-level checkpoints are a later extension of this loop. They do not inspect
+the current git diff; they inspect the thread's claims, evidence, blockers, and
+next proposed action. See [thread-checkpoint-v1.md](thread-checkpoint-v1.md).
+
 ## Product Promise
 
 Lumo should make AI coding feel calmer and more steerable.
@@ -104,6 +108,9 @@ Lumo may use multiple context layers, but should summarize them simply.
 | Linear issues | Product intent, prior decisions, related work, open constraints. |
 | Commits and PRs | Recent changes, fragile areas, regressions, ownership history. |
 | Session files and memories | Repeated friction, successful patterns, and lessons. |
+
+The first redacted thread-checkpoint dogfood case is
+[cases/tab-3017-thread-checkpoint.md](cases/tab-3017-thread-checkpoint.md).
 
 ## What Lumo Is Not
 
