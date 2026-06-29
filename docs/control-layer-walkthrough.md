@@ -185,4 +185,8 @@ Current minimal CLI:
 
 ```bash
 npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md
+pbpaste | npm run lumo -- thread-checkpoint --stdin
 ```
+
+Use [prompts/thread-checkpoint-packet.md](prompts/thread-checkpoint-packet.md)
+inside the coding-agent thread to create the redacted packet first.

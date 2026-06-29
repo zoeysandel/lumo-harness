@@ -213,22 +213,25 @@ async function main(): Promise<void> {
   }
 
   if (command === "thread-checkpoint") {
-    if (!inputPath || inputPath.trim().length === 0) {
-      console.error("--input is required for thread-checkpoint.");
+    const useStdin = hasFlag("--stdin") || inputPath === "-";
+
+    if (!useStdin && (!inputPath || inputPath.trim().length === 0)) {
+      console.error("--input or --stdin is required for thread-checkpoint.");
       process.exitCode = 2;
       return;
     }
 
-    const resolvedInputPath = path.resolve(inputPath);
-    const content = await readFile(resolvedInputPath, "utf8");
-    const card = createThreadCheckpointCard({ content, inputPath: resolvedInputPath, task: task ?? undefined });
+    const resolvedInputPath = inputPath && inputPath !== "-" ? path.resolve(inputPath) : null;
+    const inputLabel = useStdin ? "stdin" : resolvedInputPath ?? "inline content";
+    const content = useStdin ? await readStdin() : await readFile(resolvedInputPath as string, "utf8");
+    const card = createThreadCheckpointCard({ content, inputPath: inputLabel, task: task ?? undefined });
 
     if (format === "json") {
-      console.log(JSON.stringify({ inputPath: resolvedInputPath, task, threadCheckpoint: card }, null, 2));
+      console.log(JSON.stringify({ inputPath: resolvedInputPath, inputSource: useStdin ? "stdin" : "file", task, threadCheckpoint: card }, null, 2));
       return;
     }
 
-    console.log(renderThreadCheckpointCard(card, { inputPath: resolvedInputPath, task: task ?? undefined }));
+    console.log(renderThreadCheckpointCard(card, { inputPath: inputLabel, task: task ?? undefined }));
     return;
   }
 
@@ -313,6 +316,20 @@ async function emitOutput(content: string, outputPath: string | null): Promise<v
   console.log(`Wrote ${resolvedPath}`);
 }
 
+function readStdin(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let content = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (chunk: string) => {
+      content += chunk;
+    });
+    process.stdin.on("error", reject);
+    process.stdin.on("end", () => {
+      resolve(content);
+    });
+  });
+}
+
 function printHelp(): void {
   console.log(`Lumo Harness
 
@@ -325,7 +342,8 @@ Usage:
   lumo-harness preflight --path <repo> --task "..." [--with-codex] [--format markdown|json]
   lumo-harness checkpoint --path <repo> --task "..." [--with-codex] [--format markdown|json]
   lumo-harness review --path <repo> --task "..." [--with-codex] [--format markdown|json]
-  lumo-harness thread-checkpoint --input <packet.md> [--task "..."] [--format markdown|json]
+  lumo-harness thread-checkpoint --input <packet.md|-> [--task "..."] [--format markdown|json]
+  cat packet.md | lumo-harness thread-checkpoint --stdin [--task "..."] [--format markdown|json]
   lumo-harness agent --path <repo> --dry-run
   lumo-harness agent --path <repo>
 
@@ -340,6 +358,7 @@ Notes:
   checkpoint prints a read-only steering card for in-progress git changes.
   review prints a read-only completion card for deciding whether work can be claimed done.
   thread-checkpoint prints a read-only steering card for long-running agent-thread evidence packets.
+  thread-checkpoint accepts --input <file>, --input -, or --stdin.
   agent without --dry-run uses the OpenAI Agents SDK and requires OPENAI_API_KEY.
   Slice 1 writes only when init is called with --write and refuses to overwrite existing files.
 `);

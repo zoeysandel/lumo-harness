@@ -535,26 +535,80 @@ test("thread-checkpoint supports machine-readable json", async () => {
   assert.match(parsed.threadCheckpoint.recommendation, /Reframe TAB-3017/i);
 });
 
+test("thread-checkpoint accepts piped stdin", async () => {
+  const packet = await readFile(path.join(repoRoot, "docs/cases/tab-3017-thread-checkpoint.md"), "utf8");
+  const result = await runCli(
+    [
+      "thread-checkpoint",
+      "--stdin",
+      "--task",
+      "Decide whether TAB-3017 should still be framed as direct-send.",
+      "--format",
+      "json",
+    ],
+    {},
+    packet,
+  );
+  const parsed = JSON.parse(result.stdout) as {
+    inputPath: string | null;
+    inputSource: string;
+    threadCheckpoint: {
+      status: string;
+      evidenceUsed: string[];
+    };
+  };
+
+  assert.equal(result.code, 0);
+  assert.equal(parsed.inputPath, null);
+  assert.equal(parsed.inputSource, "stdin");
+  assert.equal(parsed.threadCheckpoint.status, "pivot");
+  assert.ok(parsed.threadCheckpoint.evidenceUsed.some((item) => /Input packet: stdin/i.test(item)));
+});
+
+test("thread-checkpoint accepts --input - as stdin", async () => {
+  const packet = await readFile(path.join(repoRoot, "docs/cases/tab-3017-thread-checkpoint.md"), "utf8");
+  const result = await runCli(["thread-checkpoint", "--input", "-", "--format", "json"], {}, packet);
+  const parsed = JSON.parse(result.stdout) as {
+    inputSource: string;
+    threadCheckpoint: {
+      status: string;
+    };
+  };
+
+  assert.equal(result.code, 0);
+  assert.equal(parsed.inputSource, "stdin");
+  assert.equal(parsed.threadCheckpoint.status, "pivot");
+});
+
 test("thread-checkpoint requires input", async () => {
   const result = await runCli(["thread-checkpoint"]);
 
   assert.equal(result.code, 2);
-  assert.match(result.stderr, /--input is required for thread-checkpoint/);
+  assert.match(result.stderr, /--input or --stdin is required for thread-checkpoint/);
+});
+
+test("thread-checkpoint rejects empty stdin packets", async () => {
+  const result = await runCli(["thread-checkpoint", "--stdin"], {}, "");
+
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /Thread checkpoint input must be a non-empty packet/);
 });
 
 function runCli(
   args: string[],
   env: Record<string, string> = {},
+  stdin?: string,
 ): Promise<{ code: number | null; stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ["--import", "tsx", cliPath, ...args], {
       cwd: repoRoot,
       env: { ...process.env, ...env },
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["pipe", "pipe", "pipe"],
     });
     let stdout = "";
     let stderr = "";
 
+    child.stdin.end(stdin ?? "");
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {

@@ -22,7 +22,7 @@ export function createThreadCheckpointCard(input: {
 }): ThreadCheckpointCard {
   const content = input.content.trim();
   if (!content) {
-    throw new Error("--input must point to a non-empty thread checkpoint packet.");
+    throw new Error("Thread checkpoint input must be a non-empty packet.");
   }
 
   const lower = content.toLowerCase();

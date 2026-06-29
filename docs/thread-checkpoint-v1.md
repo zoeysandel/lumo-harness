@@ -45,16 +45,28 @@ V1 starts simple. It does not have direct Codex app integration yet.
 
 Later, Lumo can read Codex threads directly through app/MCP tools.
 
+To make the packet shape repeatable, use
+[prompts/thread-checkpoint-packet.md](prompts/thread-checkpoint-packet.md) inside
+the agent thread first.
+
 ## Command
 
 ```bash
 npm run lumo -- thread-checkpoint --input <packet.md>
 ```
 
+Pipe a packet from another tool or clipboard:
+
+```bash
+pbpaste | npm run lumo -- thread-checkpoint --stdin
+cat <packet.md> | npm run lumo -- thread-checkpoint --input -
+```
+
 Machine-readable output:
 
 ```bash
 npm run lumo -- thread-checkpoint --input <packet.md> --format json
+pbpaste | npm run lumo -- thread-checkpoint --stdin --format json
 ```
 
 ## Output Card

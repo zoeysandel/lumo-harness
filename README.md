@@ -118,6 +118,22 @@ check whether the next move still follows from that evidence. V1 reads a
 redacted packet only; it does not read Codex threads, Linear, production, git, or
 provider logs by itself.
 
+Agents can create that packet first. Use
+[docs/prompts/thread-checkpoint-packet.md](docs/prompts/thread-checkpoint-packet.md)
+as the copy-paste prompt inside Codex or Claude Code.
+
+Pipe a packet directly into Lumo:
+
+```bash
+pbpaste | npm run lumo -- thread-checkpoint --stdin
+```
+
+Equivalent stdin form:
+
+```bash
+cat /tmp/lumo-thread-packet.md | npm run lumo -- thread-checkpoint --input -
+```
+
 If you want Codex or Claude Code to set up Lumo for a repo, start with analysis
 before writing any files. Copy this into your coding agent from the repo you want
 to improve:
@@ -251,10 +267,19 @@ Generate a read-only thread checkpoint card from a redacted packet:
 npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md
 ```
 
+Or ask the coding agent to create a packet with
+[docs/prompts/thread-checkpoint-packet.md](docs/prompts/thread-checkpoint-packet.md),
+then pipe it:
+
+```bash
+pbpaste | npm run lumo -- thread-checkpoint --stdin
+```
+
 Machine-readable output:
 
 ```bash
 npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md --format json
+pbpaste | npm run lumo -- thread-checkpoint --stdin --format json
 ```
 
 Deterministic scan, no API key:
