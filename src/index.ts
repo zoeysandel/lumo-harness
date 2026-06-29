@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { runCodexCheckpointSynthesis } from "./checkpoint-codex.js";
 import { createCheckpointCard, readGitCheckpointState, renderCheckpointCard } from "./checkpoint.js";
@@ -15,6 +15,7 @@ import { renderReadinessReport } from "./reporter.js";
 import { runCodexReviewSynthesis } from "./review-codex.js";
 import { createReviewCard, readGitReviewState, renderReviewCard } from "./review.js";
 import { scanRepository } from "./scanner.js";
+import { createThreadCheckpointCard, renderThreadCheckpointCard } from "./thread-checkpoint.js";
 
 type Command =
   | "doctor"
@@ -25,6 +26,7 @@ type Command =
   | "preflight"
   | "checkpoint"
   | "review"
+  | "thread-checkpoint"
   | "agent"
   | "help";
 
@@ -37,6 +39,7 @@ async function main(): Promise<void> {
   const withCodex = hasFlag("--with-codex");
   const write = hasFlag("--write");
   const task = getFlagValue("--task");
+  const inputPath = getFlagValue("--input");
   const codexTimeoutMs = parseOptionalIntegerFlag("--codex-timeout-ms");
 
   if (command === "help") {
@@ -209,6 +212,26 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === "thread-checkpoint") {
+    if (!inputPath || inputPath.trim().length === 0) {
+      console.error("--input is required for thread-checkpoint.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const resolvedInputPath = path.resolve(inputPath);
+    const content = await readFile(resolvedInputPath, "utf8");
+    const card = createThreadCheckpointCard({ content, inputPath: resolvedInputPath, task: task ?? undefined });
+
+    if (format === "json") {
+      console.log(JSON.stringify({ inputPath: resolvedInputPath, task, threadCheckpoint: card }, null, 2));
+      return;
+    }
+
+    console.log(renderThreadCheckpointCard(card, { inputPath: resolvedInputPath, task: task ?? undefined }));
+    return;
+  }
+
   if (command === "agent") {
     if (dryRun) {
       const scan = await scanRepository({ repoPath });
@@ -249,6 +272,7 @@ function parseCommand(rawCommand: string | undefined): Command {
     rawCommand === "preflight" ||
     rawCommand === "checkpoint" ||
     rawCommand === "review" ||
+    rawCommand === "thread-checkpoint" ||
     rawCommand === "agent"
   ) {
     return rawCommand;
@@ -301,6 +325,7 @@ Usage:
   lumo-harness preflight --path <repo> --task "..." [--with-codex] [--format markdown|json]
   lumo-harness checkpoint --path <repo> --task "..." [--with-codex] [--format markdown|json]
   lumo-harness review --path <repo> --task "..." [--with-codex] [--format markdown|json]
+  lumo-harness thread-checkpoint --input <packet.md> [--task "..."] [--format markdown|json]
   lumo-harness agent --path <repo> --dry-run
   lumo-harness agent --path <repo>
 
@@ -314,6 +339,7 @@ Notes:
   preflight prints a read-only decision card for the first coding-agent slice.
   checkpoint prints a read-only steering card for in-progress git changes.
   review prints a read-only completion card for deciding whether work can be claimed done.
+  thread-checkpoint prints a read-only steering card for long-running agent-thread evidence packets.
   agent without --dry-run uses the OpenAI Agents SDK and requires OPENAI_API_KEY.
   Slice 1 writes only when init is called with --write and refuses to overwrite existing files.
 `);

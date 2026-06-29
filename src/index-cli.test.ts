@@ -496,6 +496,52 @@ test("review requires task text", async () => {
   assert.match(result.stderr, /--task is required for review/);
 });
 
+test("thread-checkpoint prints a read-only steering card from a packet", async () => {
+  const result = await runCli([
+    "thread-checkpoint",
+    "--input",
+    "docs/cases/tab-3017-thread-checkpoint.md",
+    "--task",
+    "Decide whether TAB-3017 should still be framed as direct-send.",
+  ]);
+
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /# Lumo Thread Checkpoint/);
+  assert.match(result.stdout, /## Status: pivot/);
+  assert.match(result.stdout, /Direct-send can possibly cause duplicate outbound/i);
+  assert.match(result.stdout, /Reframe TAB-3017/i);
+  assert.match(result.stdout, /Read-only: no files were written/);
+});
+
+test("thread-checkpoint supports machine-readable json", async () => {
+  const result = await runCli([
+    "thread-checkpoint",
+    "--input",
+    "docs/cases/tab-3017-thread-checkpoint.md",
+    "--format",
+    "json",
+  ]);
+  const parsed = JSON.parse(result.stdout) as {
+    threadCheckpoint: {
+      status: string;
+      notProven: string[];
+      recommendation: string;
+    };
+  };
+
+  assert.equal(result.code, 0);
+  assert.equal(parsed.threadCheckpoint.status, "pivot");
+  assert.ok(parsed.threadCheckpoint.notProven.some((item) => /direct-send/i.test(item)));
+  assert.match(parsed.threadCheckpoint.recommendation, /Reframe TAB-3017/i);
+});
+
+test("thread-checkpoint requires input", async () => {
+  const result = await runCli(["thread-checkpoint"]);
+
+  assert.equal(result.code, 2);
+  assert.match(result.stderr, /--input is required for thread-checkpoint/);
+});
+
 function runCli(
   args: string[],
   env: Record<string, string> = {},

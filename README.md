@@ -107,6 +107,17 @@ Add optional local Codex interpretation:
 npm run lumo -- review --path /path/to/repo --task "Add the next small feature" --with-codex
 ```
 
+Thread-level checkpoint for long-running agent work:
+
+```bash
+npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md
+```
+
+Use this when a Codex/Claude/Cursor thread has produced evidence and you need to
+check whether the next move still follows from that evidence. V1 reads a
+redacted packet only; it does not read Codex threads, Linear, production, git, or
+provider logs by itself.
+
 If you want Codex or Claude Code to set up Lumo for a repo, start with analysis
 before writing any files. Copy this into your coding agent from the repo you want
 to improve:
@@ -233,6 +244,18 @@ npm run lumo -- review --path /path/to/repo --task "Add billing email editing"
 
 The output tells the coding agent whether it is reasonable to present the work
 as done, or whether one more check, user decision, or route change is needed.
+
+Generate a read-only thread checkpoint card from a redacted packet:
+
+```bash
+npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md
+```
+
+Machine-readable output:
+
+```bash
+npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md --format json
+```
 
 Deterministic scan, no API key:
 

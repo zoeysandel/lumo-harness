@@ -180,3 +180,9 @@ Design target:
 
 - [thread-checkpoint-v1.md](thread-checkpoint-v1.md)
 - [cases/tab-3017-thread-checkpoint.md](cases/tab-3017-thread-checkpoint.md)
+
+Current minimal CLI:
+
+```bash
+npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md
+```

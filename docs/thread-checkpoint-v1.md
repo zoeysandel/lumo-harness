@@ -1,6 +1,6 @@
 # Thread Checkpoint v1
 
-Status: design target before implementation.
+Status: minimal CLI slice implemented.
 
 ## Purpose
 
@@ -33,7 +33,7 @@ was wrong.
 
 ## Inputs
 
-V1 should start simple. It does not need direct Codex app integration yet.
+V1 starts simple. It does not have direct Codex app integration yet.
 
 | Input | V1 Shape |
 | --- | --- |
@@ -44,6 +44,18 @@ V1 should start simple. It does not need direct Codex app integration yet.
 | Risk class | Optional text, inferred later |
 
 Later, Lumo can read Codex threads directly through app/MCP tools.
+
+## Command
+
+```bash
+npm run lumo -- thread-checkpoint --input <packet.md>
+```
+
+Machine-readable output:
+
+```bash
+npm run lumo -- thread-checkpoint --input <packet.md> --format json
+```
 
 ## Output Card
 
