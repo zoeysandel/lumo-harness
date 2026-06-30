@@ -31,6 +31,11 @@ The code-risk was real, the incident was real, but the original causal framing
 was wrong.
 ```
 
+The first implementation dogfood run is captured in
+[cases/tab-3017-thread-checkpoint-dogfood.md](cases/tab-3017-thread-checkpoint-dogfood.md).
+That run used the packet prompt against the existing TAB-3017 thread, piped the
+packet into Lumo, and found a parser papercut that was fixed in Lumo itself.
+
 ## Inputs
 
 V1 starts simple. It does not have direct Codex app integration yet.
