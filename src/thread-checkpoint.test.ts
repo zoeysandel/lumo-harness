@@ -49,3 +49,48 @@ test("thread checkpoint asks to check again for unconfirmed packets", () => {
   assert.equal(card.status, "check_again");
   assert.match(card.notProven.join(" "), /verification command/i);
 });
+
+test("thread checkpoint preserves agent packet section prose", () => {
+  const card = createThreadCheckpointCard({
+    content: [
+      "# Lumo Thread Checkpoint Packet",
+      "",
+      "Status: `pivot`",
+      "",
+      "Current framing: the thread is separating a code-risk from an incident path.",
+      "",
+      "## What Was Proven",
+      "",
+      "- The direct-send code-risk exists.",
+      "- The incident evidence points elsewhere.",
+      "",
+      "## What Stayed Unproven",
+      "",
+      "- Direct-send caused this incident.",
+      "",
+      "## Drift Risk",
+      "",
+      "The thread may keep treating the incident as proof for the wrong code path.",
+      "",
+      "## Recommendation",
+      "",
+      "Reframe the issue and trace the first outbound before choosing a fix.",
+      "",
+      "## User Decision",
+      "",
+      "Ask Zoey before any Linear update, code fix, provider call, or production mutation.",
+      "",
+      "## Not Verified",
+      "",
+      "- Provider logs were not checked.",
+      "- Runtime application logs were not checked.",
+    ].join("\n"),
+  });
+
+  assert.equal(card.status, "pivot");
+  assert.match(card.driftRisk, /wrong code path/i);
+  assert.match(card.recommendation, /trace the first outbound/i);
+  assert.match(card.userDecision, /Ask Zoey before any Linear update/i);
+  assert.ok(card.notVerified.some((item) => /Provider logs were not checked/i.test(item)));
+  assert.ok(card.notVerified.some((item) => /Thread checkpoint inspected the supplied packet only/i.test(item)));
+});

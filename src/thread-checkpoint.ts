@@ -29,6 +29,7 @@ export function createThreadCheckpointCard(input: {
   const explicitStatus = extractExplicitStatus(content);
   const evidence = extractBulletsAfterHeading(content, "What Was Proven");
   const notProven = extractBulletsAfterHeading(content, "What Stayed Unproven");
+  const packetNotVerified = extractBulletsAfterHeading(content, "Not Verified");
   const originalFraming = extractFencedBlockAfterHeading(content, "Original Framing");
   const currentFraming = extractCurrentFraming(content, originalFraming);
   const recommendation = extractRecommendation(content);
@@ -51,7 +52,7 @@ export function createThreadCheckpointCard(input: {
     currentFraming,
     evidence: evidence.length > 0 ? evidence : ["UNCONFIRMED: no explicit proven-facts section was found."],
     notProven: notProven.length > 0 ? notProven : fallbackNotProven(content),
-    driftRisk: extractTableDecision(content, "Risk") ?? defaultDriftRisk(status),
+    driftRisk: extractDriftRisk(content) ?? defaultDriftRisk(status),
     recommendation,
     userDecision,
     evidenceUsed: [
@@ -61,6 +62,7 @@ export function createThreadCheckpointCard(input: {
       `Task: ${input.task?.trim() || "not provided"}`,
     ],
     notVerified: [
+      ...packetNotVerified,
       "Thread checkpoint inspected the supplied packet only.",
       "It did not read the source Codex thread, Linear issue, git diff, database, provider logs, or runtime state.",
       "It is a steering card, not a root-cause proof or approval stamp.",
@@ -160,6 +162,9 @@ function extractRecommendation(content: string): string {
   const nextSafeSlice = extractFencedBlockAfterHeading(content, "Next Safe Slice");
   if (nextSafeSlice) return nextSafeSlice.replace(/\s+/g, " ").trim();
 
+  const sectionRecommendation = extractPlainSectionAfterHeading(content, "Recommendation");
+  if (sectionRecommendation) return sectionRecommendation;
+
   const lineRecommendation = extractLineValue(content, "Recommendation");
   if (lineRecommendation) return lineRecommendation;
 
@@ -170,6 +175,9 @@ function extractUserDecision(content: string): string {
   const userChoice = extractTableDecision(content, "User choice");
   if (userChoice) return userChoice;
 
+  const sectionDecision = extractPlainSectionAfterHeading(content, "User Decision");
+  if (sectionDecision) return sectionDecision;
+
   const lineDecision = extractLineValue(content, "User decision");
   if (lineDecision) return lineDecision;
 
@@ -178,6 +186,10 @@ function extractUserDecision(content: string): string {
   }
 
   return "No explicit user decision was found; ask for the smallest steering choice before continuing.";
+}
+
+function extractDriftRisk(content: string): string | null {
+  return extractTableDecision(content, "Risk") ?? extractPlainSectionAfterHeading(content, "Drift Risk");
 }
 
 function extractTableDecision(content: string, field: string): string | null {
@@ -212,6 +224,21 @@ function extractBulletsAfterHeading(content: string, heading: string): string[] 
 function extractSectionAfterHeading(content: string, heading: string): string | null {
   const match = content.match(new RegExp(`## ${escapeRegExp(heading)}\\n([\\s\\S]*?)(?=\\n## |\\n# |$)`, "i"));
   return match?.[1] ?? null;
+}
+
+function extractPlainSectionAfterHeading(content: string, heading: string): string | null {
+  const section = extractSectionAfterHeading(content, heading);
+  if (!section) return null;
+
+  const normalized = section
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return normalized || null;
 }
 
 function fallbackNotProven(content: string): string[] {
