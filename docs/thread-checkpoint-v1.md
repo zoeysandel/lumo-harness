@@ -36,6 +36,11 @@ The first implementation dogfood run is captured in
 That run used the packet prompt against the existing TAB-3017 thread, piped the
 packet into Lumo, and found a parser papercut that was fixed in Lumo itself.
 
+The second dogfood run is captured in
+[cases/tab-3112-product-decision-dogfood.md](cases/tab-3112-product-decision-dogfood.md).
+That run used Lumo on a live investigation and showed a different value: surfacing
+the missing product rule before the coding agent moved into implementation.
+
 ## Inputs
 
 V1 starts simple. It does not have direct Codex app integration yet.
