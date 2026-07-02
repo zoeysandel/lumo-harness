@@ -16,6 +16,7 @@ import { generatePreviewPack } from "./preview.js";
 import { renderReadinessReport } from "./reporter.js";
 import { runCodexReviewSynthesis } from "./review-codex.js";
 import { createReviewCard, readGitReviewState, renderReviewCard } from "./review.js";
+import { createRouteCard, readHarnessMapContext, renderRouteCard } from "./route.js";
 import { scanRepository } from "./scanner.js";
 import { createThreadCheckpointCard, renderThreadCheckpointCard } from "./thread-checkpoint.js";
 
@@ -31,6 +32,7 @@ type Command =
   | "thread-checkpoint"
   | "pr-status"
   | "harness-map"
+  | "route"
   | "agent"
   | "help";
 
@@ -49,6 +51,8 @@ async function main(): Promise<void> {
   const codexTimeoutMs = parseOptionalIntegerFlag("--codex-timeout-ms");
   const codexHome = getFlagValue("--codex-home");
   const agentsHome = getFlagValue("--agents-home");
+  const noScan = hasFlag("--no-scan");
+  const mapPath = getFlagValue("--map");
 
   if (command === "help") {
     printHelp();
@@ -257,6 +261,27 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === "route") {
+    if (!task || task.trim().length === 0) {
+      console.error("--task is required for route.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const scan = noScan ? undefined : await scanRepository({ repoPath });
+    const harnessMap = mapPath ? await readHarnessMapContext(path.resolve(mapPath)) : undefined;
+    const card = createRouteCard({ task, scan, harnessMap });
+    const resolvedRepoPath = scan?.repoPath ?? (noScan ? null : repoPath);
+
+    if (format === "json") {
+      console.log(JSON.stringify({ repoPath: resolvedRepoPath, task, route: card }, null, 2));
+      return;
+    }
+
+    console.log(renderRouteCard(card, { repoPath: resolvedRepoPath ?? undefined, task }));
+    return;
+  }
+
   if (command === "pr-status") {
     if (!repo || repo.trim().length === 0) {
       console.error("--repo is required for pr-status and must look like owner/name.");
@@ -324,6 +349,7 @@ function parseCommand(rawCommand: string | undefined): Command {
     rawCommand === "thread-checkpoint" ||
     rawCommand === "pr-status" ||
     rawCommand === "harness-map" ||
+    rawCommand === "route" ||
     rawCommand === "agent"
   ) {
     return rawCommand;
@@ -394,6 +420,7 @@ Usage:
   cat packet.md | lumo-harness thread-checkpoint --stdin [--task "..."] [--format markdown|json]
   lumo-harness pr-status --repo <owner/name> --pr <number> [--format markdown|json]
   lumo-harness harness-map --path <repo> [--codex-home <dir>] [--agents-home <dir>] [--format markdown|json]
+  lumo-harness route --task "..." [--path <repo>] [--no-scan] [--map <harness-map-json>] [--format markdown|json]
   lumo-harness agent --path <repo> --dry-run
   lumo-harness agent --path <repo>
 
@@ -411,6 +438,7 @@ Notes:
   thread-checkpoint accepts --input <file>, --input -, or --stdin.
   pr-status reads GitHub PR metadata through gh and prints a merge/readiness steering card.
   harness-map prints a read-only metadata map of repo rails plus optional explicit Codex/Agents homes.
+  route classifies a request into the smallest useful operating mode and recommended first Lumo tool.
   agent without --dry-run uses the OpenAI Agents SDK and requires OPENAI_API_KEY.
   Slice 1 writes only when init is called with --write and refuses to overwrite existing files.
 `);

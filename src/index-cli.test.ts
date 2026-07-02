@@ -681,6 +681,122 @@ test("harness-map does not write to the target repo", async () => {
   assert.deepEqual(after, before);
 });
 
+test("route prints a read-only route card", async () => {
+  const result = await runCli([
+    "route",
+    "--path",
+    "fixtures/nextjs-dashboard-action-risk",
+    "--task",
+    "Debug the failing health check test",
+  ]);
+
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /# Lumo Route/);
+  assert.match(result.stdout, /## Mode: bugfix_investigation/);
+  assert.match(result.stdout, /preflight/);
+  assert.match(result.stdout, /Read-only: no files were written and no external systems were queried/);
+});
+
+test("route supports machine-readable json", async () => {
+  const result = await runCli([
+    "route",
+    "--path",
+    "fixtures/nextjs-dashboard-action-risk",
+    "--task",
+    "Review this PR and check CI before merge",
+    "--format",
+    "json",
+  ]);
+  const parsed = JSON.parse(result.stdout) as {
+    repoPath: string | null;
+    route: {
+      mode: string;
+      recommendedTools: Array<{ tool: string }>;
+    };
+  };
+
+  assert.equal(result.code, 0);
+  assert.ok(parsed.repoPath?.endsWith("fixtures/nextjs-dashboard-action-risk"));
+  assert.equal(parsed.route.mode, "pr_release");
+  assert.equal(parsed.route.recommendedTools[0]?.tool, "pr-status");
+});
+
+test("route requires task text", async () => {
+  const missing = await runCli(["route", "--path", "fixtures/nextjs-dashboard-action-risk"]);
+  const blank = await runCli(["route", "--task", "   "]);
+
+  assert.equal(missing.code, 2);
+  assert.match(missing.stderr, /--task is required for route/);
+  assert.equal(blank.code, 2);
+  assert.match(blank.stderr, /--task is required for route/);
+});
+
+test("route --no-scan works without a repo path", async () => {
+  const result = await runCli(["route", "--no-scan", "--task", "Explain the current behavior", "--format", "json"]);
+  const parsed = JSON.parse(result.stdout) as {
+    repoPath: string | null;
+    route: { mode: string; surface: string; recommendedTools: unknown[] };
+  };
+
+  assert.equal(result.code, 0);
+  assert.equal(parsed.repoPath, null);
+  assert.equal(parsed.route.mode, "tiny_answer");
+  assert.equal(parsed.route.surface, "silent");
+  assert.deepEqual(parsed.route.recommendedTools, []);
+});
+
+test("route consumes minimal harness-map json context", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "lumo-route-map-"));
+  const mapPath = path.join(root, "map.json");
+
+  try {
+    await writeFile(
+      mapPath,
+      JSON.stringify({ harnessMap: { status: "check_again", gaps: ["No repo AGENTS.md"], notVerified: ["Map fixture partial"] } }),
+      "utf8",
+    );
+    const result = await runCli([
+      "route",
+      "--no-scan",
+      "--map",
+      mapPath,
+      "--task",
+      "Add a settings page empty state",
+      "--format",
+      "json",
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      route: {
+        status: string;
+        recommendedTools: Array<{ tool: string }>;
+        notVerified: string[];
+      };
+    };
+
+    assert.equal(result.code, 0);
+    assert.equal(parsed.route.status, "check_again");
+    assert.equal(parsed.route.recommendedTools[0]?.tool, "harness-map");
+    assert.ok(parsed.route.notVerified.includes("Map fixture partial"));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("route does not write to the target repo", async () => {
+  const before = await snapshotFiles(dashboardFixturePath);
+  const result = await runCli([
+    "route",
+    "--path",
+    "fixtures/nextjs-dashboard-action-risk",
+    "--task",
+    "Add a small docs note",
+  ]);
+  const after = await snapshotFiles(dashboardFixturePath);
+
+  assert.equal(result.code, 0);
+  assert.deepEqual(after, before);
+});
+
 test("pr-status prints a read-only GitHub PR steering card", async () => {
   const fakeDir = await mkdtemp(path.join(os.tmpdir(), "lumo-fake-gh-"));
   const fakeGh = path.join(fakeDir, "gh");
