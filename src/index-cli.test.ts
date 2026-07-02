@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { chmod, cp, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -592,6 +592,93 @@ test("thread-checkpoint rejects empty stdin packets", async () => {
 
   assert.equal(result.code, 1);
   assert.match(result.stderr, /Thread checkpoint input must be a non-empty packet/);
+});
+
+test("harness-map prints a read-only cockpit map", async () => {
+  const result = await runCli(["harness-map", "--path", "fixtures/nextjs-dashboard-action-risk"]);
+
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /# Lumo Harness Map/);
+  assert.match(result.stdout, /## Status: check_again|## Status: pause/);
+  assert.match(result.stdout, /## Global\/User Layer/);
+  assert.match(result.stdout, /## Privacy Boundary/);
+  assert.match(result.stdout, /Read-only: no files were written and no external systems were queried/);
+});
+
+test("harness-map supports machine-readable json", async () => {
+  const result = await runCli(["harness-map", "--path", "fixtures/nextjs-dashboard-action-risk", "--format", "json"]);
+  const parsed = JSON.parse(result.stdout) as {
+    repoPath: string;
+    harnessMap: {
+      status: string;
+      mode: string;
+      layers: { commands: { items: Array<{ label: string }> } };
+    };
+  };
+
+  assert.equal(result.code, 0);
+  assert.ok(parsed.repoPath.endsWith("fixtures/nextjs-dashboard-action-risk"));
+  assert.ok(["check_again", "pause"].includes(parsed.harnessMap.status));
+  assert.equal(parsed.harnessMap.mode, "deterministic");
+  assert.ok(parsed.harnessMap.layers.commands.items.some((item) => item.label === "build"));
+});
+
+test("harness-map detects explicit fake Codex and Agents homes without rendering bodies", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "lumo-cli-harness-map-"));
+  const codexHome = path.join(root, "codex");
+  const agentsHome = path.join(root, "agents");
+
+  try {
+    await writeFile(path.join(root, "placeholder"), "", "utf8");
+    await mkdir(path.join(codexHome, "skills", "map-skill"), { recursive: true });
+    await mkdir(path.join(agentsHome, "skills", "agent-map-skill"), { recursive: true });
+    await mkdir(path.join(codexHome, "plugins", "map-plugin"), { recursive: true });
+    await writeFile(path.join(codexHome, "AGENTS.md"), "SECRET CODEX BODY\n", "utf8");
+    await writeFile(path.join(agentsHome, "AGENTS.md"), "SECRET AGENTS BODY\n", "utf8");
+    await writeFile(path.join(codexHome, "skills", "map-skill", "SKILL.md"), "SECRET SKILL BODY\n", "utf8");
+    await writeFile(path.join(agentsHome, "skills", "agent-map-skill", "SKILL.md"), "SECRET AGENT SKILL BODY\n", "utf8");
+    await writeFile(path.join(codexHome, "plugins", "map-plugin", "plugin.json"), '{"name":"map-plugin"}\n', "utf8");
+
+    const result = await runCli([
+      "harness-map",
+      "--path",
+      "fixtures/nextjs-dashboard-action-risk",
+      "--codex-home",
+      codexHome,
+      "--agents-home",
+      agentsHome,
+      "--format",
+      "json",
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      harnessMap: {
+        layers: {
+          globalCodex: { status: string };
+          globalAgents: { status: string };
+          skills: { items: Array<{ label: string }> };
+          plugins: { items: Array<{ label: string }> };
+        };
+      };
+    };
+
+    assert.equal(result.code, 0);
+    assert.equal(parsed.harnessMap.layers.globalCodex.status, "found");
+    assert.equal(parsed.harnessMap.layers.globalAgents.status, "found");
+    assert.ok(parsed.harnessMap.layers.skills.items.some((item) => item.label === "map-skill"));
+    assert.ok(parsed.harnessMap.layers.plugins.items.some((item) => item.label === "map-plugin"));
+    assert.doesNotMatch(result.stdout, /SECRET/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("harness-map does not write to the target repo", async () => {
+  const before = await snapshotFiles(dashboardFixturePath);
+  const result = await runCli(["harness-map", "--path", "fixtures/nextjs-dashboard-action-risk"]);
+  const after = await snapshotFiles(dashboardFixturePath);
+
+  assert.equal(result.code, 0);
+  assert.deepEqual(after, before);
 });
 
 test("pr-status prints a read-only GitHub PR steering card", async () => {

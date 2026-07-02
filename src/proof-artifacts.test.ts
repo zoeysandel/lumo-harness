@@ -62,7 +62,7 @@ test("stable proof card keeps the current claim boundary visible", async () => {
   assert.match(content, /What this does not prove/i);
   assert.match(content, /clean-room behavior independent from a user's global Codex setup/i);
   assert.doesNotMatch(content, /guarantees better code/i);
-  assert.ok(repoRoot.endsWith("/lumo-harness/"), "test should resolve from the repo root");
+  assert.ok(repoRoot.endsWith("/lumo-harness/") || repoRoot.includes("lumo-harness"), "test should resolve from a Lumo Harness repo/worktree root");
 });
 
 test("stable harness draft examples show repo rails without apply-mode claims", async () => {
