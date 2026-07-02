@@ -63,6 +63,21 @@ lumo doctor --path /path/to/repo
 
 ## Use It From Your Own Repo
 
+v0.2 local control-layer flow:
+
+```txt
+route -> harness-map/preflight -> checkpoint -> review -> learn
+```
+
+`harness-map` is the first implemented v0.2 map slice. It is local/read-only,
+not MCP, TUI, or SaaS:
+
+```bash
+npm run lumo -- harness-map --path /path/to/repo
+npm run lumo -- harness-map --path /path/to/repo --format json
+npm run lumo -- harness-map --path /path/to/repo --codex-home /tmp/fake-codex --agents-home /tmp/fake-agents
+```
+
 Agent-facing first step:
 
 ```bash

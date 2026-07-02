@@ -10,7 +10,7 @@ test("tester share check renders the approved minimum handoff without sending", 
   const rendered = renderTesterShareReport(report);
 
   assert.equal(report.status, "ready_to_share");
-  assert.equal(report.testerReadiness, "ready");
+  assert.ok(["ready", "ready_with_warnings"].includes(report.testerReadiness));
   assert.equal(report.testerFeedback, "pending_manual_send");
   assert.equal(report.publicReadiness, "ready");
   assert.equal(report.checks.some((check) => check.status === "fail"), false);

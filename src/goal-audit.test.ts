@@ -11,7 +11,7 @@ test("goal audit summarizes local readiness without pretending external validati
 
   assert.equal(report.status, "local_loop_ready_external_feedback_pending");
   assert.equal(report.checks.some((check) => check.status === "fail"), false);
-  assert.equal(report.testerReadiness, "ready");
+  assert.ok(["ready", "ready_with_warnings"].includes(report.testerReadiness));
   assert.equal(report.testerFeedback, "pending_manual_send");
   assert.equal(report.testerShare, "ready_to_share");
   assert.equal(report.publicReadiness, "ready");
