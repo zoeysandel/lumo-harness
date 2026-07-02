@@ -69,8 +69,17 @@ v0.2 local control-layer flow:
 route -> harness-map/preflight -> checkpoint -> review -> learn
 ```
 
-`harness-map` is the first implemented v0.2 map slice. It is local/read-only,
-not MCP, TUI, or SaaS:
+`route` is the v0.2 front door. It is local/read-only, deterministic, and
+stays silent for tiny answer-only work:
+
+```bash
+npm run lumo -- route --task "Explain how this helper works" --no-scan
+npm run lumo -- route --path /path/to/repo --task "Debug the failing settings test"
+npm run lumo -- route --path /path/to/repo --task "Review this PR before merge" --format json
+```
+
+`harness-map` maps the existing cockpit rails. It is local/read-only, not MCP,
+TUI, or SaaS:
 
 ```bash
 npm run lumo -- harness-map --path /path/to/repo
