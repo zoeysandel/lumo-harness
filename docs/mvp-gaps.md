@@ -1,6 +1,6 @@
 # Lumo Harness MVP Gaps
 
-Status: local loop ready; v0.2 toolset frozen; first private tester still
+Status: v0.2 local control-layer toolset seal-ready; first private tester still
 pending.
 
 Frozen v0.2 scope: [v0.2-scope.md](v0.2-scope.md).
@@ -129,6 +129,7 @@ Already present:
 - `npm run tester:share`, a read-only pre-send gate that prints the exact minimum share set and keep-local list.
 - `npm run public:check`, a read-only packaging gate for tester snapshots or a future public repo.
 - `npm run goal:audit`, a read-only summary gate for local readiness versus external feedback.
+- `route`, `harness-map`, and `learn` now exist as local/read-only v0.2 commands with markdown and JSON output, tests, and dogfood cases.
 
 Nothing has been sent by Lumo or Codex. The next external step belongs to Zoey.
 
@@ -171,6 +172,7 @@ Lumo works for every stack already.
 | Public repo packaging | locally documented | Use `docs/public-repo-checklist.md`; do not publish yet |
 | Claude Code parity | not in MVP | Later eval path after Codex loop is tester-proven |
 | Clean-room Codex isolation | not proven | Optional custom `CODEX_HOME` preflight; no global `AGENTS.md` required |
+| v0.2 local control-layer tools | locally built | `route`, `harness-map`, and `learn` have local markdown/JSON outputs and dogfood cases; keep caveats visible in tester docs |
 | Applying harness files to real repos | not in MVP | Preview-only until tester feedback justifies apply mode |
 | Public X post | hold | Wait for first private tester or explicit Zoey decision |
 
@@ -183,7 +185,7 @@ Lumo works for every stack already.
 - Multi-language support.
 - Claude Code eval parity.
 - Applying generated harness files to real repos.
-- Global `~/.codex` / `~/.agents` analysis.
+- Deep global `~/.codex` / `~/.agents` analysis. v0.2 `harness-map` only checks explicit or environment-provided homes at a shallow metadata level.
 - Clean-room isolation from global Codex `AGENTS.md`.
 - Claims about safety, correctness, or production readiness.
 
@@ -208,14 +210,16 @@ Minimum useful tool set to dogfood first:
 
 | Tool | Status | Next Proof |
 | --- | --- | --- |
-| `route` | missing | Choose the operating mode for a normal Codex request and reduce manual goal/loop/checkpoint setup |
+| `route` | local v0.2 | Choose the operating mode for a normal Codex request and reduce manual goal/loop/checkpoint setup; stays silent for tiny answer-only work |
 | `preflight` | local v0 | Use before a real Codex/Claude task and record whether it changed the route |
 | `checkpoint` | local v0 | Use during an active diff/thread and record whether it prevented drift or overclaim |
 | `review` | local v0 | Use before done/PR and record whether it separated proof from assumptions |
 | `thread-checkpoint` | dogfooded | Keep using on long delegated threads with heartbeat monitoring |
 | `pr-status` | local v0 | Use [cases/linkwise-release-pr-status-dogfood.md](cases/linkwise-release-pr-status-dogfood.md) as the first contract target; dogfood against real PRs to see whether it keeps checks, findings, merge policy, deploy, and runtime truth separate |
-| `harness-map` | missing | Inventory Zoey's real global/repo/skills/plugins/memory setup before turning it into automation |
-| `learn` | manual note once | Start with after-action notes like the Linkwise release dogfood before auto-proposing harness updates |
+| `harness-map` | local v0.2 | Inventory repo rails plus shallow explicit Codex/Agents home metadata before turning cockpit assumptions into automation |
+| `learn` | local v0.2 light | Turn redacted repeated friction into one proposal only; no auto-writing rules, memories, skills, docs, or external systems |
 
-MCP should wait until `route`, `harness-map`, and `learn` are built and the full
-v0.2 control-layer path has been dogfooded enough to know its stable contracts.
+MCP should still wait. `route`, `harness-map`, and `learn` are built as local
+v0.2 tools, but the full control-layer path needs more real dogfood before its
+contracts are stable enough to package as MCP, TUI, SaaS, or installable product
+surface.

@@ -7,7 +7,7 @@ an AI coding agent. The current repo-init flow is the first concrete slice; the
 broader product is a routing, checkpoint, review, and learning layer. See
 [docs/product-direction.md](docs/product-direction.md). For the first dogfood
 walkthrough, see [docs/control-layer-walkthrough.md](docs/control-layer-walkthrough.md).
-For the frozen v0.2 scope, see [docs/v0.2-scope.md](docs/v0.2-scope.md).
+For the frozen v0.2 scope, see [docs/v0.2-scope.md](docs/v0.2-scope.md); for the seal note, see [docs/lumo-v0.2-seal.md](docs/lumo-v0.2-seal.md).
 For the first thread-checkpoint design target, see
 [docs/thread-checkpoint-v1.md](docs/thread-checkpoint-v1.md).
 MCP is intentionally later: Lumo should first prove the local tools that MCP
