@@ -7,8 +7,17 @@ an AI coding agent. The current repo-init flow is the first concrete slice; the
 broader product is a routing, checkpoint, review, and learning layer. See
 [docs/product-direction.md](docs/product-direction.md). For the first dogfood
 walkthrough, see [docs/control-layer-walkthrough.md](docs/control-layer-walkthrough.md).
+For the frozen v0.2 scope, see [docs/v0.2-scope.md](docs/v0.2-scope.md).
 For the first thread-checkpoint design target, see
 [docs/thread-checkpoint-v1.md](docs/thread-checkpoint-v1.md).
+MCP is intentionally later: Lumo should first prove the local tools that MCP
+would expose, especially checkpointing, PR-status clarity, harness mapping, and
+learning from repeated friction.
+For the smallest private tester path, start with
+[docs/private-tester-2-minute-brief.md](docs/private-tester-2-minute-brief.md),
+then inspect the redacted
+[example steering card](docs/examples/redacted-steering-card.md) and
+[tiny demo flow](docs/tiny-demo-flow.md).
 
 Status: v0 local proof. Lumo Harness scans a local repo, previews agent rails,
 and compares Codex behavior with and without a generated repo `AGENTS.md`. It
@@ -132,6 +141,24 @@ Equivalent stdin form:
 
 ```bash
 cat /tmp/lumo-thread-packet.md | npm run lumo -- thread-checkpoint --input -
+```
+
+PR/release status clarity:
+
+```bash
+npm run lumo -- pr-status --repo tabmedianl/linkwise-backend --pr 2192
+```
+
+Use this when a PR or release thread feels ambiguous. Lumo reads GitHub metadata
+through the local `gh` CLI and separates checks, active review threads, bot
+findings, merge state, and the not-verified boundary. It is read-only: it does
+not resolve threads, rerun checks, comment, push, merge, deploy, or inspect
+runtime proof.
+
+For agent/MCP callers:
+
+```bash
+npm run lumo -- pr-status --repo tabmedianl/linkwise-backend --pr 2192 --format json
 ```
 
 If you want Codex or Claude Code to set up Lumo for a repo, start with analysis
@@ -280,6 +307,13 @@ Machine-readable output:
 ```bash
 npm run lumo -- thread-checkpoint --input docs/cases/tab-3017-thread-checkpoint.md --format json
 pbpaste | npm run lumo -- thread-checkpoint --stdin --format json
+```
+
+Generate a read-only PR status card from GitHub metadata:
+
+```bash
+npm run lumo -- pr-status --repo tabmedianl/linkwise-backend --pr 2192
+npm run lumo -- pr-status --repo tabmedianl/linkwise-backend --pr 2192 --format json
 ```
 
 Deterministic scan, no API key:
@@ -526,6 +560,11 @@ The card must keep claims narrow:
 - verification and not-verified notes.
 
 For first-time testers, use [docs/public-tester-quickstart.md](docs/public-tester-quickstart.md).
+For the smallest private tester brief, use
+[docs/private-tester-2-minute-brief.md](docs/private-tester-2-minute-brief.md).
+For a redacted steering-card example, use
+[docs/examples/redacted-steering-card.md](docs/examples/redacted-steering-card.md).
+For the tiny control-layer demo flow, use [docs/tiny-demo-flow.md](docs/tiny-demo-flow.md).
 For the current v0 soft-launch brief, use [docs/lumo-v0-test-brief.md](docs/lumo-v0-test-brief.md).
 For the short tester-facing story, use [docs/first-tester-proof-brief.md](docs/first-tester-proof-brief.md).
 For a draft invite message, use [docs/first-tester-invite-draft.md](docs/first-tester-invite-draft.md).
@@ -561,6 +600,9 @@ For the checkpoint method and current best proof, see:
 - [docs/mvp-use-case.md](docs/mvp-use-case.md)
 - [docs/lumo-init-mvp-scope.md](docs/lumo-init-mvp-scope.md)
 - [docs/control-layer-walkthrough.md](docs/control-layer-walkthrough.md)
+- [docs/private-tester-2-minute-brief.md](docs/private-tester-2-minute-brief.md)
+- [docs/examples/redacted-steering-card.md](docs/examples/redacted-steering-card.md)
+- [docs/tiny-demo-flow.md](docs/tiny-demo-flow.md)
 - [docs/lumo-v0-test-brief.md](docs/lumo-v0-test-brief.md)
 - [docs/golden-use-case.md](docs/golden-use-case.md)
 - [docs/nextjs-harness-quality-bar.md](docs/nextjs-harness-quality-bar.md)

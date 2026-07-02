@@ -230,7 +230,8 @@ test("manual review records human judgment without turning it into a broad claim
 test("mvp gaps reflect current local readiness and remaining tester gate", async () => {
   const gaps = await readFile(new URL("mvp-gaps.md", docsRoot), "utf8");
 
-  assert.match(gaps, /local loop ready; ready to share; first private tester still pending/i);
+  assert.match(gaps, /local loop ready; v0\.2 toolset frozen; first private tester still/i);
+  assert.match(gaps, /Frozen v0\.2 scope: \[v0\.2-scope\.md\]/);
   assert.match(gaps, /2026-06-22T22-54-49-904Z-nextjs-dashboard-action-risk/);
   assert.match(gaps, /dashboard-action-manual-review\.md/);
   assert.match(gaps, /docs\/demo-walkthrough\.md/);

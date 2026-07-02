@@ -594,6 +594,67 @@ test("thread-checkpoint rejects empty stdin packets", async () => {
   assert.match(result.stderr, /Thread checkpoint input must be a non-empty packet/);
 });
 
+test("pr-status prints a read-only GitHub PR steering card", async () => {
+  const fakeDir = await mkdtemp(path.join(os.tmpdir(), "lumo-fake-gh-"));
+  const fakeGh = path.join(fakeDir, "gh");
+
+  try {
+    await writeFakeGh(fakeGh);
+    const result = await runCli(
+      ["pr-status", "--repo", "tabmedianl/linkwise-backend", "--pr", "2192"],
+      { LUMO_GH_BIN: fakeGh },
+    );
+
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /# Lumo PR Status/);
+    assert.match(result.stdout, /## Status: go/);
+    assert.match(result.stdout, /release-gate-evaluator/);
+    assert.match(result.stdout, /Active bot findings: 0/);
+    assert.match(result.stdout, /Read-only: no GitHub mutation was performed/);
+  } finally {
+    await rm(fakeDir, { recursive: true, force: true });
+  }
+});
+
+test("pr-status supports machine-readable json", async () => {
+  const fakeDir = await mkdtemp(path.join(os.tmpdir(), "lumo-fake-gh-"));
+  const fakeGh = path.join(fakeDir, "gh");
+
+  try {
+    await writeFakeGh(fakeGh);
+    const result = await runCli(
+      ["pr-status", "--repo", "tabmedianl/linkwise-backend", "--pr", "2192", "--format", "json"],
+      { LUMO_GH_BIN: fakeGh },
+    );
+    const parsed = JSON.parse(result.stdout) as {
+      prStatus: {
+        status: string;
+        reviewThreads: {
+          activeBotFindings: number;
+          outdatedUnresolved: number;
+        };
+      };
+    };
+
+    assert.equal(result.code, 0);
+    assert.equal(parsed.prStatus.status, "go");
+    assert.equal(parsed.prStatus.reviewThreads.activeBotFindings, 0);
+    assert.equal(parsed.prStatus.reviewThreads.outdatedUnresolved, 1);
+  } finally {
+    await rm(fakeDir, { recursive: true, force: true });
+  }
+});
+
+test("pr-status requires repo and PR number", async () => {
+  const missingRepo = await runCli(["pr-status", "--pr", "2192"]);
+  const missingPr = await runCli(["pr-status", "--repo", "tabmedianl/linkwise-backend"]);
+
+  assert.equal(missingRepo.code, 2);
+  assert.match(missingRepo.stderr, /--repo is required/);
+  assert.equal(missingPr.code, 2);
+  assert.match(missingPr.stderr, /--pr is required/);
+});
+
 function runCli(
   args: string[],
   env: Record<string, string> = {},
@@ -719,6 +780,50 @@ async function writeFakeCodex(fakeCodex: string): Promise<void> {
     "utf8",
   );
   await chmod(fakeCodex, 0o755);
+}
+
+async function writeFakeGh(fakeGh: string): Promise<void> {
+  await writeFile(
+    fakeGh,
+    [
+      "#!/usr/bin/env node",
+      "const args = process.argv.slice(2);",
+      "if (args[0] === 'pr' && args[1] === 'view') {",
+      "  console.log(JSON.stringify({",
+      "    number: 2192,",
+      "    title: 'Release develop to main',",
+      "    url: 'https://github.com/tabmedianl/linkwise-backend/pull/2192',",
+      "    state: 'OPEN',",
+      "    isDraft: false,",
+      "    baseRefName: 'main',",
+      "    headRefName: 'codex-release',",
+      "    headRefOid: 'abc123',",
+      "    mergeable: 'MERGEABLE',",
+      "    mergeStateStatus: 'CLEAN',",
+      "    reviewDecision: 'APPROVED',",
+      "    statusCheckRollup: [",
+      "      { name: 'verify-prod-migrations', status: 'COMPLETED', conclusion: 'SUCCESS' },",
+      "      { name: 'release-gate-evaluator', status: 'COMPLETED', conclusion: 'SUCCESS' }",
+      "    ]",
+      "  }));",
+      "  process.exit(0);",
+      "}",
+      "if (args[0] === 'api' && args[1] === 'graphql') {",
+      "  console.log(JSON.stringify({",
+      "    data: { repository: { pullRequest: { reviewThreads: { nodes: [",
+      "      { isResolved: false, isOutdated: true, comments: { nodes: [",
+      "        { author: { login: 'chatgpt-codex-connector' }, body: 'Outdated finding' }",
+      "      ] } }",
+      "    ] } } } }",
+      "  }));",
+      "  process.exit(0);",
+      "}",
+      "console.error('unexpected gh args: ' + args.join(' '));",
+      "process.exit(1);",
+    ].join("\n"),
+    "utf8",
+  );
+  await chmod(fakeGh, 0o755);
 }
 
 async function snapshotFiles(root: string): Promise<Record<string, string>> {

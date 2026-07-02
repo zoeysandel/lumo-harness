@@ -1,7 +1,11 @@
 # Public Tester Quickstart
 
 Use this when someone wants to try Lumo Harness without knowing the backstory.
-For the shorter "why should I care?" version, start with
+For the shortest private tester entrypoint, start with
+[private-tester-2-minute-brief.md](private-tester-2-minute-brief.md), then
+[examples/redacted-steering-card.md](examples/redacted-steering-card.md) and
+[tiny-demo-flow.md](tiny-demo-flow.md).
+For the longer "why should I care?" version, start with
 [lumo-v0-test-brief.md](lumo-v0-test-brief.md), then
 [first-tester-proof-brief.md](first-tester-proof-brief.md).
 For a two-minute live explanation, use [demo-walkthrough.md](demo-walkthrough.md).

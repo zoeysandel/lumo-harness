@@ -7,7 +7,7 @@ Status: local checklist only. Nothing has been sent by Lumo or Codex.
 
 ## Minimum Share Set
 
-Point the tester at these files first:
+Point the tester at these stable files first:
 
 ```txt
 docs/first-tester-proof-brief.md
@@ -19,9 +19,16 @@ docs/examples/dashboard-action-manual-review.md
 docs/examples/screenshots/dashboard-action-proof-card.png
 ```
 
-These explain the current v0 value proposition, the control-layer walkthrough,
-the proof, the local quickstart, the strongest stable proof card, and the manual
-review caveats.
+If the tester only has two minutes, use this shortcut before the longer
+quickstart:
+
+- `docs/private-tester-2-minute-brief.md`
+- `docs/examples/redacted-steering-card.md`
+- `docs/tiny-demo-flow.md`
+
+Together these explain the current v0 value proposition, one redacted
+steering-card example, the tiny control-layer flow, the proof, the local
+quickstart, the strongest stable proof card, and the manual review caveats.
 
 ## Internal Zoey Files
 

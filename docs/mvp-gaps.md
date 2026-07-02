@@ -1,6 +1,9 @@
 # Lumo Harness MVP Gaps
 
-Status: local loop ready; ready to share; first private tester still pending.
+Status: local loop ready; v0.2 toolset frozen; first private tester still
+pending.
+
+Frozen v0.2 scope: [v0.2-scope.md](v0.2-scope.md).
 
 This file is the public-repo readiness checklist. It should stay stricter than
 the pitch: if something is only locally proven, say so.
@@ -176,6 +179,7 @@ Lumo works for every stack already.
 - TUI.
 - SaaS.
 - Auth/license gate.
+- MCP server.
 - Multi-language support.
 - Claude Code eval parity.
 - Applying generated harness files to real repos.
@@ -194,3 +198,24 @@ expand_to_3_testers | tighten_docs | tighten_eval | pause_public_story
 
 Use `nextjs-ops-console-advanced-risk` as the current larger-work dogfood proof
 only with its manual-review caveat: smaller and calmer, not uniquely safer.
+
+## Tools-First Before MCP
+
+The next validation layer is not an MCP server. It is proving which Lumo tools
+are useful enough that an MCP server would simply expose them cleanly.
+
+Minimum useful tool set to dogfood first:
+
+| Tool | Status | Next Proof |
+| --- | --- | --- |
+| `route` | missing | Choose the operating mode for a normal Codex request and reduce manual goal/loop/checkpoint setup |
+| `preflight` | local v0 | Use before a real Codex/Claude task and record whether it changed the route |
+| `checkpoint` | local v0 | Use during an active diff/thread and record whether it prevented drift or overclaim |
+| `review` | local v0 | Use before done/PR and record whether it separated proof from assumptions |
+| `thread-checkpoint` | dogfooded | Keep using on long delegated threads with heartbeat monitoring |
+| `pr-status` | local v0 | Use [cases/linkwise-release-pr-status-dogfood.md](cases/linkwise-release-pr-status-dogfood.md) as the first contract target; dogfood against real PRs to see whether it keeps checks, findings, merge policy, deploy, and runtime truth separate |
+| `harness-map` | missing | Inventory Zoey's real global/repo/skills/plugins/memory setup before turning it into automation |
+| `learn` | manual note once | Start with after-action notes like the Linkwise release dogfood before auto-proposing harness updates |
+
+MCP should wait until `route`, `harness-map`, and `learn` are built and the full
+v0.2 control-layer path has been dogfooded enough to know its stable contracts.

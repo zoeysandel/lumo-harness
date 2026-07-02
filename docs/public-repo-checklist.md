@@ -26,6 +26,8 @@ Core scope docs:
 ```txt
 docs/mvp-use-case.md
 docs/lumo-init-mvp-scope.md
+docs/private-tester-2-minute-brief.md
+docs/tiny-demo-flow.md
 docs/lumo-v0-test-brief.md
 docs/golden-use-case.md
 docs/nextjs-harness-quality-bar.md
@@ -45,6 +47,7 @@ docs/examples/CLAUDE.md.draft
 docs/examples/workflows/
 docs/examples/dashboard-action-proof-card.html
 docs/examples/dashboard-action-manual-review.md
+docs/examples/redacted-steering-card.md
 docs/examples/dashboard-action-x-draft.md
 docs/examples/screenshots/dashboard-action-proof-card.png
 ```
