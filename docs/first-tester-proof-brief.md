@@ -3,6 +3,8 @@
 Use this when asking one builder to try Lumo Harness for the first time.
 For a sendable-but-not-yet-sent message, use
 [first-tester-invite-draft.md](first-tester-invite-draft.md).
+For the shortest tester entrypoint, start with
+[private-tester-2-minute-brief.md](private-tester-2-minute-brief.md).
 For the current v0 entrypoint, start with
 [lumo-v0-test-brief.md](lumo-v0-test-brief.md).
 
@@ -11,6 +13,8 @@ Codex or Claude Code and want to see whether repo-level rails make agent work
 easier to review.
 
 For a shorter live explanation, use [demo-walkthrough.md](demo-walkthrough.md).
+For a redacted steering-card example, use
+[examples/redacted-steering-card.md](examples/redacted-steering-card.md).
 
 ## One-Sentence Pitch
 

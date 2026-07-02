@@ -1,6 +1,8 @@
 # Lumo v0 Test Brief
 
-Use this as the first page for a private tester or soft-launch reader.
+Use this as the longer v0 proof page for a private tester or soft-launch reader.
+For the shortest tester entrypoint, start with
+[private-tester-2-minute-brief.md](private-tester-2-minute-brief.md).
 
 Status: early local proof. Nothing here claims production safety, guaranteed
 better code, or support for every stack.
@@ -117,6 +119,8 @@ open "$(ls -td eval-runs/* | head -1)/eval-card.html"
 For the longer walkthrough, use [public-tester-quickstart.md](public-tester-quickstart.md).
 For the control-layer explanation, use
 [control-layer-walkthrough.md](control-layer-walkthrough.md).
+For a redacted steering-card example, use
+[examples/redacted-steering-card.md](examples/redacted-steering-card.md).
 
 ## Feedback We Want
 

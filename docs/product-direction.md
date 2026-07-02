@@ -1,6 +1,8 @@
 # Lumo Product Direction
 
-Status: direction lock before the next build slice.
+Status: v0.2 direction locked. The toolset is frozen until the v0.2 seal.
+
+For the frozen v0.2 scope, see [v0.2-scope.md](v0.2-scope.md).
 
 ## One Sentence
 
@@ -112,6 +114,14 @@ Lumo may use multiple context layers, but should summarize them simply.
 The first redacted thread-checkpoint dogfood case is
 [cases/tab-3017-thread-checkpoint.md](cases/tab-3017-thread-checkpoint.md).
 
+Later live dogfood cases:
+
+- [cases/tab-3112-product-decision-dogfood.md](cases/tab-3112-product-decision-dogfood.md)
+  showed that Lumo can pause a technical fix until the product rule is clear.
+- [cases/linkwise-release-pr-status-dogfood.md](cases/linkwise-release-pr-status-dogfood.md)
+  showed that release truth is multi-state: checks, bot findings, mergeability,
+  merge, deployment, runtime proof, and branch drift all need to stay separate.
+
 ## What Lumo Is Not
 
 - Not a giant rulebook.
@@ -134,6 +144,8 @@ User -> Codex/Claude/Cursor -> Lumo -> Codex/Claude/Cursor -> User
 Early commands can stay small:
 
 ```txt
+lumo route --repo . --task "..."
+lumo harness-map --repo .
 lumo preflight --repo . --task "..."
 lumo checkpoint --repo . --run .lumo/runs/latest
 lumo review --repo . --run .lumo/runs/latest
@@ -142,6 +154,41 @@ lumo learn --repo . --run .lumo/runs/latest
 
 These commands should produce compact, agent-readable output plus a
 human-readable decision card when a steering decision is needed.
+
+## Tools Before MCP
+
+Do not build the MCP server before the core tools are useful as local,
+dogfooded primitives.
+
+The important product question is not:
+
+```txt
+Can Lumo expose an MCP interface?
+```
+
+The important product question is:
+
+```txt
+Which Lumo tools consistently help Codex/Claude make better decisions during
+real work?
+```
+
+Before MCP, Lumo should prove these local tools:
+
+| Tool | Purpose | Proof Needed |
+| --- | --- | --- |
+| `route` | Choose the operating mode and which Lumo tool Codex should use first | Reduces the need for Zoey to manually design goals, loops, checkpoints, or release gates |
+| `preflight` | Decide whether the task is sharp enough to start and which route to take | Catches missing context, risky seams, and too-large slices before coding |
+| `checkpoint` | Decide whether the active agent work should continue, pause, check again, or pivot | Helps during real threads without adding ceremony |
+| `review` | Decide whether the agent can honestly claim done | Separates changed, verified, not verified, blocked, and next owner |
+| `thread-checkpoint` | Turn long agent threads into a small steering card | Reduces manual polling and preserves evidence, recommendation, user decision, and not-verified sections |
+| `pr-status` | Explain PR/release truth in plain language | Distinguishes code-ready, checks-green, policy-blocked, merged, deployed, and runtime-unproven |
+| `harness-map` | Inventory the user's actual coding-agent operating system | Maps global/repo `AGENTS.md`, skills, plugins, docs, memories, sessions, workflows, and drift |
+| `learn` | Convert repeated friction into proposed harness improvements | Suggests small updates to rules, skills, docs, checks, or workflow habits without auto-writing them |
+
+This is the v0.2 tool freeze. MCP becomes useful only after these tools have
+stable inputs, outputs, and decision language. Until then, MCP would mostly
+package uncertainty.
 
 ## Relationship To Current MVP
 
