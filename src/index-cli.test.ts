@@ -797,6 +797,114 @@ test("route does not write to the target repo", async () => {
   assert.deepEqual(after, before);
 });
 
+test("learn prints a read-only proposal card from file input", async () => {
+  const result = await runCli([
+    "learn",
+    "--input",
+    "docs/cases/lumo-learn-dogfood.md",
+    "--task",
+    "Learn from repeated release status friction",
+  ]);
+
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /# Lumo Learn/);
+  assert.match(result.stdout, /## Status: go/);
+  assert.match(result.stdout, /Type: deterministic_check|Type: workflow_note/);
+  assert.match(result.stdout, /Read-only: no files were written and no external systems were queried/);
+});
+
+test("learn supports machine-readable json and optional repo scan", async () => {
+  const result = await runCli([
+    "learn",
+    "--input",
+    "docs/cases/lumo-learn-dogfood.md",
+    "--path",
+    "fixtures/nextjs-dashboard-action-risk",
+    "--format",
+    "json",
+  ]);
+  const parsed = JSON.parse(result.stdout) as {
+    inputPath: string | null;
+    inputSource: string;
+    task: string | null;
+    learn: {
+      mode: string;
+      proposal: { type: string };
+      evidence: string[];
+    };
+  };
+
+  assert.equal(result.code, 0);
+  assert.ok(parsed.inputPath?.endsWith("docs/cases/lumo-learn-dogfood.md"));
+  assert.equal(parsed.inputSource, "file");
+  assert.equal(parsed.task, null);
+  assert.equal(parsed.learn.mode, "deterministic");
+  assert.ok(parsed.learn.evidence.some((item) => /Repo scanned:/i.test(item)));
+});
+
+test("learn accepts piped stdin", async () => {
+  const packet = "# Lumo Learn Packet\n\n## Friction\n- CI setup failed again.\n\n## Repeated Signal\n- repeated\n\n## Evidence\n- Redacted facts.\n\n## Desired Next Time\n- Add a check.\n";
+  const result = await runCli(["learn", "--stdin", "--format", "json"], {}, packet);
+  const parsed = JSON.parse(result.stdout) as {
+    inputPath: string | null;
+    inputSource: string;
+    learn: { proposal: { type: string } };
+  };
+
+  assert.equal(result.code, 0);
+  assert.equal(parsed.inputPath, null);
+  assert.equal(parsed.inputSource, "stdin");
+  assert.equal(parsed.learn.proposal.type, "deterministic_check");
+});
+
+test("learn accepts --input - as stdin", async () => {
+  const packet = "# Lumo Learn Packet\n\n## Friction\n- Approval gate missed again.\n\n## Repeated Signal\n- repeated\n\n## Evidence\n- Redacted facts.\n\n## Desired Next Time\n- Add a repo rule.\n";
+  const result = await runCli(["learn", "--input", "-", "--format", "json"], {}, packet);
+  const parsed = JSON.parse(result.stdout) as {
+    inputSource: string;
+    learn: { proposal: { type: string } };
+  };
+
+  assert.equal(result.code, 0);
+  assert.equal(parsed.inputSource, "stdin");
+  assert.equal(parsed.learn.proposal.type, "repo_rule");
+});
+
+test("learn requires input and rejects empty packets", async () => {
+  const missing = await runCli(["learn"]);
+  const empty = await runCli(["learn", "--stdin"], {}, "");
+
+  assert.equal(missing.code, 2);
+  assert.match(missing.stderr, /--input or --stdin is required for learn/);
+  assert.equal(empty.code, 1);
+  assert.match(empty.stderr, /Learn input must be a non-empty packet/);
+});
+
+test("learn does not echo raw sensitive content", async () => {
+  const packet = "# Lumo Learn Packet\n\n## Friction\n- secret token abc123 touched production CRM again.\n\n## Repeated Signal\n- repeated\n\n## Evidence\n- token abc123\n\n## Desired Next Time\n- Add a rule.\n";
+  const result = await runCli(["learn", "--stdin"], {}, packet);
+
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /## Status: pause/);
+  assert.match(result.stdout, /Sensitive content present; not echoed/);
+  assert.doesNotMatch(result.stdout, /abc123/);
+});
+
+test("learn does not write to the target repo", async () => {
+  const before = await snapshotFiles(dashboardFixturePath);
+  const result = await runCli([
+    "learn",
+    "--input",
+    "docs/cases/lumo-learn-dogfood.md",
+    "--path",
+    "fixtures/nextjs-dashboard-action-risk",
+  ]);
+  const after = await snapshotFiles(dashboardFixturePath);
+
+  assert.equal(result.code, 0);
+  assert.deepEqual(after, before);
+});
+
 test("pr-status prints a read-only GitHub PR steering card", async () => {
   const fakeDir = await mkdtemp(path.join(os.tmpdir(), "lumo-fake-gh-"));
   const fakeGh = path.join(fakeDir, "gh");
