@@ -9,6 +9,7 @@ import { renderDoctorReport, runDoctor } from "./doctor.js";
 import { readHarnessMapState, createHarnessMapCard, renderHarnessMapCard } from "./harness-map.js";
 import { renderHtmlReadinessReport } from "./html-report.js";
 import { renderInitResult, runInit } from "./init.js";
+import { createLearnCard, renderLearnCard } from "./learn.js";
 import { runCodexPreflightSynthesis } from "./preflight-codex.js";
 import { createPreflightCard, renderPreflightCard } from "./preflight.js";
 import { createPrStatusCard, readPrStatusFromGh, renderPrStatusCard } from "./pr-status.js";
@@ -33,6 +34,7 @@ type Command =
   | "pr-status"
   | "harness-map"
   | "route"
+  | "learn"
   | "agent"
   | "help";
 
@@ -282,6 +284,35 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === "learn") {
+    const useStdin = hasFlag("--stdin") || inputPath === "-";
+
+    if (!useStdin && (!inputPath || inputPath.trim().length === 0)) {
+      console.error("--input or --stdin is required for learn.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const resolvedInputPath = inputPath && inputPath !== "-" ? path.resolve(inputPath) : null;
+    const content = useStdin ? await readStdin() : await readFile(resolvedInputPath as string, "utf8");
+    if (content.trim().length === 0) {
+      console.error("Learn input must be a non-empty packet.");
+      process.exitCode = 1;
+      return;
+    }
+
+    const scan = hasFlag("--path") ? await scanRepository({ repoPath }) : undefined;
+    const card = createLearnCard({ content, task: task ?? undefined, scan, inputPath: resolvedInputPath ?? undefined });
+
+    if (format === "json") {
+      console.log(JSON.stringify({ inputPath: resolvedInputPath, inputSource: useStdin ? "stdin" : "file", task: task ?? null, learn: card }, null, 2));
+      return;
+    }
+
+    console.log(renderLearnCard(card, { inputPath: resolvedInputPath ?? undefined, inputSource: useStdin ? "stdin" : "file", task: task ?? undefined }));
+    return;
+  }
+
   if (command === "pr-status") {
     if (!repo || repo.trim().length === 0) {
       console.error("--repo is required for pr-status and must look like owner/name.");
@@ -350,6 +381,7 @@ function parseCommand(rawCommand: string | undefined): Command {
     rawCommand === "pr-status" ||
     rawCommand === "harness-map" ||
     rawCommand === "route" ||
+    rawCommand === "learn" ||
     rawCommand === "agent"
   ) {
     return rawCommand;
@@ -421,6 +453,8 @@ Usage:
   lumo-harness pr-status --repo <owner/name> --pr <number> [--format markdown|json]
   lumo-harness harness-map --path <repo> [--codex-home <dir>] [--agents-home <dir>] [--format markdown|json]
   lumo-harness route --task "..." [--path <repo>] [--no-scan] [--map <harness-map-json>] [--format markdown|json]
+  lumo-harness learn --input <packet.md|-> [--task "..."] [--path <repo>] [--format markdown|json]
+  cat packet.md | lumo-harness learn --stdin [--task "..."] [--path <repo>] [--format markdown|json]
   lumo-harness agent --path <repo> --dry-run
   lumo-harness agent --path <repo>
 
@@ -439,6 +473,7 @@ Notes:
   pr-status reads GitHub PR metadata through gh and prints a merge/readiness steering card.
   harness-map prints a read-only metadata map of repo rails plus optional explicit Codex/Agents homes.
   route classifies a request into the smallest useful operating mode and recommended first Lumo tool.
+  learn proposes exactly one small harness improvement from a redacted friction packet; it never writes changes.
   agent without --dry-run uses the OpenAI Agents SDK and requires OPENAI_API_KEY.
   Slice 1 writes only when init is called with --write and refuses to overwrite existing files.
 `);

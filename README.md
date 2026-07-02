@@ -87,6 +87,16 @@ npm run lumo -- harness-map --path /path/to/repo --format json
 npm run lumo -- harness-map --path /path/to/repo --codex-home /tmp/fake-codex --agents-home /tmp/fake-agents
 ```
 
+`learn` turns a redacted friction packet into exactly one proposed harness
+improvement. It is proposal-only and never writes repo docs, global rules,
+memories, skills, GitHub, Linear, CRM, production, or external systems:
+
+```bash
+npm run lumo -- learn --input docs/cases/lumo-learn-dogfood.md
+cat docs/cases/lumo-learn-dogfood.md | npm run lumo -- learn --stdin
+npm run lumo -- learn --input docs/cases/lumo-learn-dogfood.md --format json
+```
+
 Agent-facing first step:
 
 ```bash
